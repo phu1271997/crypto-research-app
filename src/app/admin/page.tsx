@@ -300,16 +300,16 @@ export default function AdminPage() {
 
   // ── Segmented Control Helper ──
   const SegmentedControl = ({ options, value, onChange }: { options: { label: string; value: string }[]; value: string; onChange: (v: any) => void }) => (
-    <div className="flex rounded-lg bg-black/40 p-0.5 border border-white/5">
+    <div className="flex rounded-lg bg-surface-2 p-0.5 border border-border">
       {options.map(opt => (
         <button
           key={opt.value}
           type="button"
           onClick={() => onChange(opt.value)}
-          className={`flex-1 px-2 py-1.5 rounded-md text-[11px] font-semibold transition-all duration-200 whitespace-nowrap ${
+          className={`flex-1 px-2 py-1.5 rounded-md text-[11px] font-display font-semibold transition-all duration-200 whitespace-nowrap ${
             value === opt.value
-              ? 'bg-indigo-600 text-white shadow-sm'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'bg-brand-soft text-brand border border-brand-border/30 shadow-sm'
+              : 'text-text-3 hover:text-text border border-transparent'
           }`}
         >
           {opt.label}
@@ -324,13 +324,13 @@ export default function AdminPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* ─── Header ─── */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-white/5 pb-5">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-border pb-5">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
-            <Terminal className="text-indigo-400 h-8 w-8" />
-            Social Bot <span className="text-indigo-400">Manager</span>
+          <h1 className="text-3xl font-display font-[800] tracking-tight text-text flex items-center gap-3">
+            <Terminal className="text-brand h-8 w-8" />
+            Social Bot <span className="text-brand font-medium">Manager</span>
           </h1>
-          <p className="mt-1 text-slate-400 text-sm">
+          <p className="mt-1 text-text-3 text-sm">
             Quản trị trạng thái và phát hành bài viết lên WordPress + X (Twitter) từ xa.
           </p>
         </div>
@@ -340,12 +340,12 @@ export default function AdminPage() {
           <button
             onClick={() => handleQueueCommand('TRENDING', {}, 'trending')}
             disabled={isAnyLoading}
-            className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30 hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-none"
+            className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-brand-2 to-brand hover:brightness-110 text-[#052e2a] shadow transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-none"
           >
             {loadingAction === 'trending' ? (
               <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Đang quét...</>
             ) : (
-              <><Sparkles className="h-3.5 w-3.5 text-yellow-300 animate-pulse" /> Quét Tin Hot (Trending)</>
+              <><Sparkles className="h-3.5 w-3.5 text-[#052e2a] animate-pulse" /> Quét Tin Hot (Trending)</>
             )}
           </button>
 
@@ -354,8 +354,8 @@ export default function AdminPage() {
             onClick={() => setIsPolling(!isPolling)}
             className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold border transition-all duration-200 ${
               isPolling
-                ? 'bg-indigo-600/10 text-indigo-300 border-indigo-500/20'
-                : 'bg-white/5 text-slate-400 border-transparent hover:bg-white/10'
+                ? 'bg-brand-soft text-brand border-brand-border'
+                : 'bg-surface-2 text-text-2 border-border hover:bg-surface-hover hover:text-text'
             }`}
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isPolling ? 'animate-spin' : ''}`} />
@@ -365,10 +365,10 @@ export default function AdminPage() {
           {/* Online badge */}
           <div className={`flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium border ${
             isOnline
-              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]'
-              : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+              ? 'bg-pos-soft text-pos border-pos-bd shadow-sm'
+              : 'bg-neg-soft text-neg border-neg-bd'
           }`}>
-            <span className={`h-2 w-2 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+            <span className={`h-2 w-2 rounded-full ${isOnline ? 'bg-pos animate-pulse' : 'bg-neg'}`} />
             {isOnline ? 'VPS Bot Online' : 'VPS Bot Offline'}
           </div>
         </div>
@@ -376,20 +376,20 @@ export default function AdminPage() {
 
       {/* ─── Notifications ─── */}
       {errorMsg && (
-        <div className="flex items-start gap-3 rounded-xl bg-rose-500/10 border border-rose-500/20 p-4 text-sm text-rose-300 animate-in slide-in-from-top-2 duration-300">
+        <div className="flex items-start gap-3 rounded-xl bg-neg-soft border border-neg-bd p-4 text-sm text-neg animate-in slide-in-from-top-2 duration-300">
           <AlertCircle className="h-5 w-5 shrink-0" />
           <div className="flex-grow">
             <p className="font-medium">Lỗi xảy ra</p>
-            <p className="text-rose-400/90">{errorMsg}</p>
+            <p className="text-neg/90">{errorMsg}</p>
           </div>
         </div>
       )}
       {successMsg && (
-        <div className="flex items-start gap-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-4 text-sm text-emerald-300 animate-in slide-in-from-top-2 duration-300">
+        <div className="flex items-start gap-3 rounded-xl bg-pos-soft border border-pos-bd p-4 text-sm text-pos animate-in slide-in-from-top-2 duration-300">
           <CheckCircle2 className="h-5 w-5 shrink-0" />
           <div className="flex-grow">
             <p className="font-medium">Thành công</p>
-            <p className="text-emerald-400/90">{successMsg}</p>
+            <p className="text-pos/90">{successMsg}</p>
           </div>
         </div>
       )}
@@ -400,39 +400,39 @@ export default function AdminPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         {/* ──── Status Panel + Model Config (4 cols) ──── */}
-        <div className="lg:col-span-4 rounded-2xl border border-white/5 bg-[#0a0f1d] p-6 space-y-4 shadow-xl">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Activity className="text-indigo-400 h-5 w-5" /> Trạng Thái Hoạt Động
+        <div className="lg:col-span-4 rounded-2xl border border-border bg-surface p-6 space-y-4 shadow-sm">
+          <h2 className="text-lg font-display font-bold text-text flex items-center gap-2">
+            <Activity className="text-brand h-5 w-5" /> Trạng Thái Hoạt Động
           </h2>
 
-          <div className="divide-y divide-white/5 text-sm space-y-3 pt-2">
+          <div className="divide-y divide-border text-sm space-y-3 pt-2">
             <div className="flex justify-between py-1">
-              <span className="text-slate-400">Trạng thái:</span>
-              <span className="font-semibold text-white capitalize">{status?.status || 'Không rõ'}</span>
+              <span className="text-text-3">Trạng thái:</span>
+              <span className="font-semibold text-text capitalize font-mono">{status?.status || 'Không rõ'}</span>
             </div>
             <div className="flex justify-between py-1 pt-2">
-              <span className="text-slate-400">Uptime:</span>
-              <span className="font-semibold text-slate-200">{status ? formatUptime(status.uptime) : 'N/A'}</span>
+              <span className="text-text-3">Uptime:</span>
+              <span className="font-semibold text-text-2">{status ? formatUptime(status.uptime) : 'N/A'}</span>
             </div>
             <div className="flex justify-between py-1 pt-2">
-              <span className="text-slate-400">Cập nhật lúc:</span>
-              <span className="font-semibold text-slate-200">{status ? new Date(status.last_seen).toLocaleTimeString() : 'N/A'}</span>
+              <span className="text-text-3">Cập nhật lúc:</span>
+              <span className="font-semibold text-text-2">{status ? new Date(status.last_seen).toLocaleTimeString() : 'N/A'}</span>
             </div>
           </div>
 
           {/* ── Model Configuration ── */}
-          <div className="pt-4 border-t border-white/5 space-y-3">
-            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Settings className="h-3.5 w-3.5 text-indigo-400" /> Cấu Hình Model AI
+          <div className="pt-4 border-t border-border space-y-3">
+            <h3 className="text-xs font-display font-semibold text-text-3 uppercase tracking-wider flex items-center gap-1.5">
+              <Settings className="h-3.5 w-3.5 text-brand" /> Cấu Hình Model AI
             </h3>
 
             <div className="space-y-2.5">
               <div>
-                <label className="block text-[10px] font-medium text-slate-500 uppercase mb-1">Model viết bài</label>
+                <label className="block text-[10px] font-medium text-text-3 uppercase mb-1">Model viết bài</label>
                 <select
                   value={selectedArticleModel}
                   onChange={(e) => setSelectedArticleModel(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none transition cursor-pointer"
+                  className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-xs text-text focus:border-brand focus:outline-none transition cursor-pointer font-mono"
                 >
                   {ARTICLE_MODELS.map(m => (
                     <option key={m.id} value={m.id}>{m.name} — {m.cost}</option>
@@ -441,11 +441,11 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-medium text-slate-500 uppercase mb-1">Model tạo ảnh</label>
+                <label className="block text-[10px] font-medium text-text-3 uppercase mb-1">Model tạo ảnh</label>
                 <select
                   value={selectedImageModel}
                   onChange={(e) => setSelectedImageModel(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none transition cursor-pointer"
+                  className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-xs text-text focus:border-brand focus:outline-none transition cursor-pointer font-mono"
                 >
                   {IMAGE_MODELS.map(m => (
                     <option key={m.id} value={m.id}>{m.name} — {m.note}</option>
@@ -456,7 +456,7 @@ export default function AdminPage() {
               <button
                 onClick={handleUpdateConfig}
                 disabled={isAnyLoading}
-                className="w-full flex items-center justify-center gap-2 rounded-lg bg-white/5 border border-white/10 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:bg-white/10 hover:text-white transition disabled:bg-white/[0.02] disabled:text-slate-500 disabled:border-transparent disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 rounded-lg bg-surface-2 border border-border px-2.5 py-1.5 text-xs font-display font-semibold text-text-2 hover:bg-surface-hover hover:text-text transition disabled:bg-surface-2 disabled:text-text-3 disabled:border-transparent disabled:cursor-not-allowed"
               >
                 {loadingAction === 'update_config' ? (
                   <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Đang cập nhật...</>
@@ -469,32 +469,32 @@ export default function AdminPage() {
         </div>
 
         {/* ──── Generate Panel + Config Options (5 cols) ──── */}
-        <div className="lg:col-span-5 rounded-2xl border border-white/5 bg-[#0a0f1d] p-6 space-y-4 shadow-xl">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Cpu className="text-indigo-400 h-5 w-5" /> Yêu Cầu Viết Bài Mới
+        <div className="lg:col-span-5 rounded-2xl border border-border bg-surface p-6 space-y-4 shadow-sm">
+          <h2 className="text-lg font-display font-bold text-text flex items-center gap-2">
+            <Cpu className="text-copper h-5 w-5" /> Yêu Cầu Viết Bài Mới
           </h2>
 
           <div className="space-y-4 pt-1">
             {/* Topic input */}
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Chủ đề bài viết</label>
+              <label className="block text-xs font-semibold text-text-3 uppercase mb-1.5">Chủ đề bài viết</label>
               <textarea
                 rows={2}
                 value={newTopic}
                 onChange={(e) => setNewTopic(e.target.value)}
                 placeholder="Nhập chủ đề crypto cần phân tích và viết..."
-                className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none transition resize-none leading-relaxed"
+                className="w-full rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm text-text placeholder-text-3 focus:border-brand focus:bg-surface-hover focus:outline-none transition resize-none leading-relaxed"
               />
             </div>
 
             {/* Config options - segmented controls */}
-            <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3.5 space-y-3">
-              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Tùy chọn xuất bản</span>
+            <div className="bg-surface-2/40 border border-border rounded-xl p-3.5 space-y-3">
+              <span className="text-[10px] font-semibold text-text-3 uppercase tracking-wider">Tùy chọn xuất bản</span>
 
               <div className="flex flex-col gap-2.5">
                 {/* Platform */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.02] sm:border-0 pb-2 sm:pb-0">
-                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Nền tảng</label>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/40 sm:border-0 pb-2 sm:pb-0">
+                  <label className="text-[10px] font-semibold text-text-3 uppercase tracking-wider">Nền tảng</label>
                   <div className="w-full sm:w-56">
                     <SegmentedControl
                       options={[
@@ -508,8 +508,8 @@ export default function AdminPage() {
                 </div>
 
                 {/* Mode */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.02] sm:border-0 pb-2 sm:pb-0">
-                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Phương thức</label>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/40 sm:border-0 pb-2 sm:pb-0">
+                  <label className="text-[10px] font-semibold text-text-3 uppercase tracking-wider">Phương thức</label>
                   <div className="w-full sm:w-64">
                     <SegmentedControl
                       options={[
@@ -525,7 +525,7 @@ export default function AdminPage() {
 
                 {/* X Format */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Định dạng X</label>
+                  <label className="text-[10px] font-semibold text-text-3 uppercase tracking-wider">Định dạng X</label>
                   <div className="w-full sm:w-56">
                     <SegmentedControl
                       options={[
@@ -547,7 +547,7 @@ export default function AdminPage() {
                 meta: { target_platform: targetPlatform, publish_mode: publishMode, x_format: xFormat },
               }, 'generate')}
               disabled={isAnyLoading || !newTopic.trim()}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-500 disabled:bg-white/5 disabled:text-slate-500 disabled:cursor-not-allowed transition duration-200 shadow-md shadow-indigo-600/10"
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-brand-2 to-brand hover:brightness-110 px-4 py-2 text-xs font-display font-semibold text-[#052e2a] hover:shadow-md transition duration-200 disabled:bg-surface-2 disabled:text-text-3 disabled:cursor-not-allowed disabled:brightness-100 disabled:shadow-none"
             >
               {loadingAction === 'generate' ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> Đang tạo bài viết...</>
@@ -559,35 +559,35 @@ export default function AdminPage() {
         </div>
 
         {/* ──── Command Queue (3 cols) ──── */}
-        <div className="lg:col-span-3 rounded-2xl border border-white/5 bg-[#0a0f1d] p-6 space-y-4 shadow-xl">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Terminal className="text-indigo-400 h-5 w-5" /> Hàng Đợi Lệnh
+        <div className="lg:col-span-3 rounded-2xl border border-border bg-surface p-6 space-y-4 shadow-sm">
+          <h2 className="text-lg font-display font-bold text-text flex items-center gap-2">
+            <Terminal className="text-brand h-5 w-5" /> Hàng Đợi Lệnh
           </h2>
 
           <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
             {commands.length === 0 ? (
-              <p className="text-slate-500 text-sm py-4 text-center">Chưa có lệnh nào.</p>
+              <p className="text-text-3 text-sm py-4 text-center">Chưa có lệnh nào.</p>
             ) : (
               commands.map((cmd) => (
-                <div key={cmd.id} className="flex items-center justify-between border-b border-white/5 pb-2 text-xs">
+                <div key={cmd.id} className="flex items-center justify-between border-b border-border pb-2 text-xs">
                   <div className="space-y-0.5">
-                    <span className="font-semibold text-indigo-300 font-mono">#{cmd.id}</span>
-                    <span className="bg-white/5 px-1.5 py-0.5 rounded ml-2 font-mono text-[10px] text-slate-300">{cmd.type}</span>
+                    <span className="font-semibold text-brand font-mono">#{cmd.id}</span>
+                    <span className="bg-surface-2 px-1.5 py-0.5 rounded ml-2 font-mono text-[10px] text-text-2">{cmd.type}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
                       cmd.status === 'done'
-                        ? 'bg-emerald-500/10 text-emerald-400'
+                        ? 'bg-pos-soft text-pos border border-pos-bd'
                         : cmd.status === 'failed'
-                        ? 'bg-rose-500/10 text-rose-400'
+                        ? 'bg-neg-soft text-neg border border-neg-bd'
                         : cmd.status === 'processing'
-                        ? 'bg-amber-500/10 text-amber-400'
-                        : 'bg-white/5 text-slate-400'
+                        ? 'bg-warn-soft text-warn border border-warn-bd animate-pulse-slow'
+                        : 'bg-surface-2 text-text-3 border border-border'
                     }`}>
                       {cmd.status === 'processing' && <Loader2 className="h-2.5 w-2.5 animate-spin inline mr-1" />}
                       {cmd.status}
                     </span>
-                    <span className="text-slate-500 text-[10px]">
+                    <span className="text-text-3 text-[10px]">
                       {new Date(cmd.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
@@ -602,18 +602,18 @@ export default function AdminPage() {
           SUGGESTED TOPICS GRID
           ═══════════════════════════════════ */}
       {status?.config?.trending_topics && (
-        <div className="rounded-2xl border border-white/5 bg-[#0a0f1d] p-6 space-y-4 shadow-xl">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 border-b border-white/5 pb-4">
+        <div className="rounded-2xl border border-border bg-surface p-6 space-y-4 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 border-b border-border pb-4">
             <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Sparkles className="text-indigo-400 h-5 w-5 animate-pulse" />
+              <h2 className="text-lg font-display font-bold text-text flex items-center gap-2">
+                <Sparkles className="text-brand h-5 w-5 animate-pulse" />
                 Chủ Đề Nổi Bật Được AI Gợi Ý (Trending Topics)
               </h2>
-              <p className="mt-1 text-slate-400 text-xs">
+              <p className="mt-1 text-text-3 text-xs">
                 Tổng hợp từ RSS, CryptoPanic và Coin68. Nhấp vào chủ đề để tự động điền vào ô viết bài bên trên.
               </p>
             </div>
-            <div className="text-[10px] text-slate-500 font-medium md:text-right">
+            <div className="text-[10px] text-text-3 font-medium md:text-right">
               Cập nhật lúc: {status ? new Date(status.last_seen).toLocaleTimeString() : 'N/A'}
             </div>
           </div>
@@ -630,28 +630,28 @@ export default function AdminPage() {
                     (element as HTMLInputElement).focus();
                   }
                 }}
-                className="group text-left p-4 rounded-xl border border-white/5 bg-black/30 hover:bg-indigo-500/5 hover:border-indigo-500/30 transition-all duration-300 flex flex-col justify-between gap-3 shadow-md hover:shadow-[0_0_20px_rgba(99,102,241,0.05)]"
+                className="group text-left p-4 rounded-xl border border-border bg-surface-2/50 hover:bg-surface-hover hover:border-border-strong transition-all duration-300 flex flex-col justify-between gap-3 shadow-sm"
               >
                 <div className="space-y-2">
                   <div className="flex items-start gap-2.5">
-                    <span className="flex items-center justify-center shrink-0 w-5 h-5 rounded bg-indigo-500/10 text-indigo-400 font-mono text-xs font-bold mt-0.5 group-hover:bg-indigo-500 group-hover:text-white transition-colors duration-300">
+                    <span className="flex items-center justify-center shrink-0 w-5 h-5 rounded bg-brand-soft text-brand font-mono text-xs font-bold mt-0.5 group-hover:bg-brand group-hover:text-[#052e2a] transition-colors duration-300">
                       {idx + 1}
                     </span>
-                    <span className="font-semibold text-sm text-slate-200 group-hover:text-white leading-snug transition-colors duration-200 line-clamp-2">
+                    <span className="font-semibold text-sm text-text group-hover:text-brand leading-snug transition-colors duration-200 line-clamp-2">
                       {t.title}
                     </span>
                   </div>
                   {t.reason && (
-                    <p className="text-xs text-slate-400 leading-relaxed group-hover:text-slate-300 transition-colors duration-200 pl-7 line-clamp-2">
+                    <p className="text-xs text-text-2 leading-relaxed pl-7 line-clamp-2">
                       {t.reason}
                     </p>
                   )}
                 </div>
-                <div className="flex items-center justify-between text-[10px] pl-7 text-slate-500">
-                  <span className="bg-white/5 px-2 py-0.5 rounded font-medium text-[9px] uppercase tracking-wider text-slate-400 group-hover:bg-indigo-500/20 group-hover:text-indigo-300 transition-all duration-300">
+                <div className="flex items-center justify-between text-[10px] pl-7 text-text-3">
+                  <span className="bg-surface-2 px-2 py-0.5 rounded font-medium font-mono text-[9px] uppercase tracking-wider text-text-3 group-hover:bg-brand-soft group-hover:text-brand transition-all duration-300">
                     {t.source || 'Tin tức'}
                   </span>
-                  <span className="opacity-0 group-hover:opacity-100 text-indigo-400 font-semibold transition-opacity duration-300 flex items-center gap-0.5">
+                  <span className="opacity-0 group-hover:opacity-100 text-brand font-semibold transition-opacity duration-300 flex items-center gap-0.5">
                     Chọn chủ đề <ArrowUpRight className="h-3 w-3" />
                   </span>
                 </div>
@@ -667,14 +667,14 @@ export default function AdminPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
         {/* ──── Left: Draft Articles List (4 cols) ──── */}
-        <div className="lg:col-span-4 rounded-2xl border border-white/5 bg-[#0a0f1d] p-6 space-y-4 shadow-xl">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <FileText className="text-indigo-400 h-5 w-5" /> Danh Sách Nháp Chờ Duyệt ({drafts.length})
+        <div className="lg:col-span-4 rounded-2xl border border-border bg-surface p-6 space-y-4 shadow-sm">
+          <h2 className="text-lg font-display font-bold text-text flex items-center gap-2">
+            <FileText className="text-copper h-5 w-5" /> Danh Sách Nháp Chờ Duyệt ({drafts.length})
           </h2>
 
           <div className="space-y-3 overflow-y-auto max-h-[600px] pr-1">
             {drafts.length === 0 ? (
-              <p className="text-slate-500 text-sm py-8 text-center">Chưa có bài viết nháp nào.</p>
+              <p className="text-text-3 text-sm py-8 text-center">Chưa có bài viết nháp nào.</p>
             ) : (
               drafts.map((draft) => (
                 <div
@@ -682,34 +682,34 @@ export default function AdminPage() {
                   onClick={() => setSelectedDraftId(draft.id)}
                   className={`rounded-xl border p-4 cursor-pointer transition-all ${
                     selectedDraftId === draft.id
-                      ? 'bg-indigo-600/10 border-indigo-500/40'
-                      : 'border-white/5 bg-black/20 hover:border-white/10 hover:bg-black/30'
+                      ? 'bg-brand-soft border-brand-border'
+                      : 'border-border bg-surface-2/60 hover:border-border-strong hover:bg-surface-hover'
                   }`}
                 >
                   <div className="flex justify-between items-start gap-2">
                     <span className={`rounded-full px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider ${
                       draft.status === 'published'
-                        ? 'bg-emerald-500/10 text-emerald-400'
+                        ? 'bg-pos-soft text-pos border border-pos-bd'
                         : draft.status === 'publishing'
-                        ? 'bg-amber-500/10 text-amber-400'
+                        ? 'bg-warn-soft text-warn border border-warn-bd animate-pulse-slow'
                         : draft.status === 'approved'
-                        ? 'bg-sky-500/10 text-sky-400'
+                        ? 'bg-brand-soft text-brand border border-brand-border'
                         : draft.status === 'failed'
-                        ? 'bg-rose-500/10 text-rose-400'
-                        : 'bg-indigo-500/10 text-indigo-400'
+                        ? 'bg-neg-soft text-neg border border-neg-bd'
+                        : 'bg-surface-2 text-text-2 border border-border'
                     }`}>
                       {draft.status}
                     </span>
-                    <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                    <span className="text-[10px] text-text-3 flex items-center gap-1">
                       <Clock className="h-3 w-3" />
                       {new Date(draft.updated_at).toLocaleDateString([], { month: '2-digit', day: '2-digit' })}
                     </span>
                   </div>
-                  <h3 className="mt-2 text-sm font-bold text-slate-200 line-clamp-2">
+                  <h3 className="mt-2 text-sm font-bold text-text line-clamp-2">
                     {draft.payload?.title || draft.topic}
                   </h3>
-                  <p className="mt-1 text-xs text-slate-400 line-clamp-1">Chủ đề: {draft.topic}</p>
-                  <div className="mt-2 flex justify-between items-center text-[10px] text-slate-500">
+                  <p className="mt-1 text-xs text-text-2 line-clamp-1">Chủ đề: {draft.topic}</p>
+                  <div className="mt-2 flex justify-between items-center text-[10px] text-text-3">
                     <span>Phiên bản: v{draft.version}</span>
                     <span>{draft.payload?.tweets?.length || 0} Tweets</span>
                   </div>
@@ -720,44 +720,44 @@ export default function AdminPage() {
         </div>
 
         {/* ──── Right: Interactive Editor (8 cols) ──── */}
-        <div className="lg:col-span-8 rounded-2xl border border-white/5 bg-[#0a0f1d] p-6 shadow-xl">
+        <div className="lg:col-span-8 rounded-2xl border border-border bg-surface p-6 shadow-sm">
 
           {!selectedDraft ? (
             /* Empty state */
             <div className="h-full flex flex-col justify-center items-center py-20 text-center space-y-4">
-              <Sparkles className="h-12 w-12 text-slate-600 animate-pulse" />
+              <Sparkles className="h-12 w-12 text-text-3 animate-pulse" />
               <div>
-                <h3 className="text-base font-semibold text-white">Chưa Chọn Bài Viết</h3>
-                <p className="mt-1 text-sm text-slate-500 max-w-sm">
+                <h3 className="text-base font-display font-semibold text-text">Chưa Chọn Bài Viết</h3>
+                <p className="mt-1 text-sm text-text-2 max-w-sm">
                   Chọn một bài viết nháp ở danh sách bên trái để mở giao diện biên tập chi tiết và duyệt phát hành bài viết.
                 </p>
               </div>
 
               {/* Recent articles archive */}
               <div className="w-full max-w-md pt-8 text-left space-y-3">
-                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                  <ArrowUpRight className="h-4 w-4 text-indigo-400" /> Nhật ký phát hành gần đây:
+                <h4 className="text-xs font-semibold text-text-3 uppercase tracking-wider flex items-center gap-2">
+                  <ArrowUpRight className="h-4 w-4 text-brand" /> Nhật ký phát hành gần đây:
                 </h4>
-                <div className="bg-black/20 rounded-xl border border-white/5 p-3 space-y-2">
+                <div className="bg-surface-2 rounded-xl border border-border p-3 space-y-2">
                   {recentArticles.length === 0 ? (
-                    <div className="text-slate-500 text-xs py-2 text-center">Chưa có lịch sử xuất bản.</div>
+                    <div className="text-text-3 text-xs py-2 text-center">Chưa có lịch sử xuất bản.</div>
                   ) : (
                     recentArticles.map(art => (
-                      <div key={art.id} className="text-xs flex items-center justify-between border-b border-white/5 pb-2 last:border-0 last:pb-0">
-                        <span className="font-semibold text-slate-300 truncate max-w-[200px]">{art.title}</span>
+                      <div key={art.id} className="text-xs flex items-center justify-between border-b border-border pb-2 last:border-0 last:pb-0">
+                        <span className="font-semibold text-text-2 truncate max-w-[200px] font-display">{art.title}</span>
                         <div className="flex items-center gap-2 shrink-0">
                           {art.primus_url && (
-                            <a href={art.primus_url} target="_blank" rel="noreferrer" className="text-indigo-400 hover:text-indigo-300 flex items-center gap-0.5">
+                            <a href={art.primus_url} target="_blank" rel="noreferrer" className="text-brand hover:text-brand-2 flex items-center gap-0.5">
                               WP <ExternalLink className="h-2.5 w-2.5" />
                             </a>
                           )}
                           {art.x1_url && (
-                            <a href={art.x1_url} target="_blank" rel="noreferrer" className="text-sky-400 hover:text-sky-300 flex items-center gap-0.5">
+                            <a href={art.x1_url} target="_blank" rel="noreferrer" className="text-copper hover:underline flex items-center gap-0.5">
                               X1 <ExternalLink className="h-2.5 w-2.5" />
                             </a>
                           )}
                           {art.x2_url && (
-                            <a href={art.x2_url} target="_blank" rel="noreferrer" className="text-sky-400 hover:text-sky-300 flex items-center gap-0.5">
+                            <a href={art.x2_url} target="_blank" rel="noreferrer" className="text-copper hover:underline flex items-center gap-0.5">
                               X2 <ExternalLink className="h-2.5 w-2.5" />
                             </a>
                           )}
@@ -773,10 +773,10 @@ export default function AdminPage() {
             <div className="space-y-6">
 
               {/* Editor header */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/5 pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-4">
                 <div>
-                  <h3 className="text-lg font-bold text-white">Biên Tập & Kiểm Duyệt</h3>
-                  <p className="text-xs text-slate-400 truncate max-w-[400px]">
+                  <h3 className="text-lg font-display font-bold text-text">Biên Tập & Kiểm Duyệt</h3>
+                  <p className="text-xs text-text-3 truncate max-w-[400px]">
                     ID: {selectedDraft.id} | Phiên bản: v{selectedDraft.version}
                   </p>
                 </div>
@@ -785,7 +785,7 @@ export default function AdminPage() {
                   <button
                     onClick={() => handleSaveDraft(false)}
                     disabled={isAnyLoading}
-                    className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-white/10 hover:text-white transition disabled:bg-white/[0.02] disabled:text-slate-500 disabled:border-transparent disabled:cursor-not-allowed"
+                    className="flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-display font-semibold text-text-2 hover:bg-surface-hover hover:text-text transition disabled:bg-surface-2 disabled:text-text-3 disabled:border-transparent disabled:cursor-not-allowed"
                   >
                     {loadingAction === 'save' ? (
                       <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Đang lưu...</>
@@ -798,7 +798,7 @@ export default function AdminPage() {
                   <button
                     onClick={() => handleSaveDraft(true)}
                     disabled={isAnyLoading || selectedDraft.status === 'publishing' || selectedDraft.status === 'published'}
-                    className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 shadow-md shadow-indigo-600/10 transition disabled:bg-white/5 disabled:text-slate-500 disabled:cursor-not-allowed"
+                    className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-brand-2 to-brand hover:brightness-110 px-3 py-1.5 text-xs font-display font-semibold text-[#052e2a] hover:shadow-sm transition disabled:bg-surface-2 disabled:text-text-3 disabled:cursor-not-allowed disabled:brightness-100 disabled:shadow-none"
                   >
                     {loadingAction === 'publish' ? (
                       <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Đang đăng bài...</>
@@ -810,13 +810,13 @@ export default function AdminPage() {
               </div>
 
               {/* Regenerate action bar */}
-              <div className="bg-indigo-600/5 rounded-xl border border-indigo-500/10 p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <span className="text-slate-400 font-semibold uppercase tracking-wider text-[10px]">Tái tạo bài viết nháp này:</span>
+              <div className="bg-brand-soft/50 rounded-xl border border-brand-border/30 p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <span className="text-text-3 font-semibold uppercase tracking-wider text-[10px]">Tái tạo bài viết nháp này:</span>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleQueueCommand('REGENERATE_THREAD', { draft_id: selectedDraft.id }, 'regen_thread')}
                     disabled={isAnyLoading}
-                    className="rounded-lg bg-black/40 px-2.5 py-1.5 text-xs text-slate-300 hover:text-white border border-white/5 hover:bg-black/60 transition disabled:bg-white/[0.02] disabled:text-slate-500 disabled:cursor-not-allowed"
+                    className="rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-text-2 hover:text-text border border-border hover:bg-surface-hover transition disabled:bg-surface-2/40 disabled:text-text-3 disabled:cursor-not-allowed"
                   >
                     {loadingAction === 'regen_thread' ? (
                       <><Loader2 className="h-3 w-3 animate-spin inline mr-1" />Đang viết lại...</>
@@ -825,7 +825,7 @@ export default function AdminPage() {
                   <button
                     onClick={() => handleQueueCommand('REGENERATE_IMAGES', { draft_id: selectedDraft.id }, 'regen_images')}
                     disabled={isAnyLoading}
-                    className="rounded-lg bg-black/40 px-2.5 py-1.5 text-xs text-slate-300 hover:text-white border border-white/5 hover:bg-black/60 transition disabled:bg-white/[0.02] disabled:text-slate-500 disabled:cursor-not-allowed"
+                    className="rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-text-2 hover:text-text border border-border hover:bg-surface-hover transition disabled:bg-surface-2/40 disabled:text-text-3 disabled:cursor-not-allowed"
                   >
                     {loadingAction === 'regen_images' ? (
                       <><Loader2 className="h-3 w-3 animate-spin inline mr-1" />Đang tạo ảnh...</>
@@ -834,7 +834,7 @@ export default function AdminPage() {
                   <button
                     onClick={() => handleQueueCommand('REGENERATE_ALL', { draft_id: selectedDraft.id }, 'regen_all')}
                     disabled={isAnyLoading}
-                    className="rounded-lg bg-indigo-600/20 px-2.5 py-1.5 text-xs text-indigo-300 hover:text-white border border-indigo-500/10 hover:bg-indigo-600/30 transition disabled:bg-white/[0.02] disabled:text-slate-500 disabled:cursor-not-allowed"
+                    className="rounded-lg bg-copper-soft px-2.5 py-1.5 text-xs text-copper hover:brightness-110 border border-copper/30 hover:bg-copper-soft/80 transition disabled:bg-surface-2/40 disabled:text-text-3 disabled:cursor-not-allowed"
                   >
                     {loadingAction === 'regen_all' ? (
                       <><Loader2 className="h-3 w-3 animate-spin inline mr-1" />Đang làm mới...</>
@@ -847,12 +847,12 @@ export default function AdminPage() {
               <div className="space-y-4">
 
                 {/* Publishing config (editable, loaded from draft meta) */}
-                <div className="bg-white/[0.02] border border-white/5 rounded-xl p-4 space-y-3">
-                  <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Cấu hình xuất bản (chỉnh sửa trước khi đăng)</span>
+                <div className="bg-surface-2/40 border border-border rounded-xl p-4 space-y-3">
+                  <span className="text-[10px] font-semibold text-text-3 uppercase tracking-wider">Cấu hình xuất bản (chỉnh sửa trước khi đăng)</span>
                   <div className="flex flex-col gap-2.5">
                     {/* Platform */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.02] sm:border-0 pb-2 sm:pb-0">
-                      <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Nền tảng</label>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/40 sm:border-0 pb-2 sm:pb-0">
+                      <label className="text-[10px] font-semibold text-text-3 uppercase tracking-wider">Nền tảng</label>
                       <div className="w-full sm:w-56">
                         <SegmentedControl
                           options={[
@@ -865,8 +865,8 @@ export default function AdminPage() {
                       </div>
                     </div>
                     {/* Mode */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.02] sm:border-0 pb-2 sm:pb-0">
-                      <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Phương thức</label>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/40 sm:border-0 pb-2 sm:pb-0">
+                      <label className="text-[10px] font-semibold text-text-3 uppercase tracking-wider">Phương thức</label>
                       <div className="w-full sm:w-64">
                         <SegmentedControl
                           options={[
@@ -881,7 +881,7 @@ export default function AdminPage() {
                     </div>
                     {/* X Format */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Định dạng X</label>
+                      <label className="text-[10px] font-semibold text-text-3 uppercase tracking-wider">Định dạng X</label>
                       <div className="w-full sm:w-56">
                         <SegmentedControl
                           options={[
@@ -898,33 +898,33 @@ export default function AdminPage() {
 
                 {/* Title input */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Tiêu đề bài viết</label>
+                  <label className="block text-xs font-semibold text-text-3 uppercase mb-1.5">Tiêu đề bài viết</label>
                   <textarea
                     rows={2}
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none transition resize-none leading-relaxed"
+                    className="w-full rounded-xl border border-border bg-surface-2 px-4 py-2.5 text-sm text-text focus:border-brand focus:bg-surface-hover focus:outline-none transition resize-none leading-relaxed"
                   />
                 </div>
 
                 {/* Markdown Content */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Nội dung bài viết (Markdown - Tiếng Việt)</label>
+                  <label className="block text-xs font-semibold text-text-3 uppercase mb-1.5">Nội dung bài viết (Markdown - Tiếng Việt)</label>
                   <textarea
                     rows={12}
                     value={editArticleMd}
                     onChange={(e) => setEditArticleMd(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-slate-200 font-mono focus:border-indigo-500 focus:outline-none transition resize-y"
+                    className="w-full rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm text-text font-mono focus:border-brand focus:bg-surface-hover focus:outline-none transition resize-y"
                   />
                 </div>
 
                 {/* Twitter Thread */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="block text-xs font-semibold text-slate-400 uppercase">Twitter Thread (Tiếng Anh)</label>
+                    <label className="block text-xs font-semibold text-text-3 uppercase">Twitter Thread (Tiếng Anh)</label>
                     <button
                       onClick={handleAddTweet}
-                      className="flex items-center gap-1 rounded bg-white/5 hover:bg-white/10 px-2 py-1 text-[11px] text-slate-300 transition"
+                      className="flex items-center gap-1 rounded bg-surface-2 border border-border hover:bg-surface-hover px-2 py-1 text-[11px] text-text-2 transition"
                     >
                       <Plus className="h-3 w-3" /> Thêm Tweet
                     </button>
@@ -932,13 +932,13 @@ export default function AdminPage() {
 
                   <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
                     {editTweets.map((tweet, idx) => (
-                      <div key={idx} className="bg-black/30 rounded-xl border border-white/5 p-3 relative flex gap-3 group">
+                      <div key={idx} className="bg-surface-2 rounded-xl border border-border p-3 relative flex gap-3 group">
                         <div className="flex flex-col items-center shrink-0">
-                          <div className="h-6 w-6 rounded-full bg-sky-500/10 text-sky-400 text-xs font-bold flex items-center justify-center border border-sky-500/20">
+                          <div className="h-6 w-6 rounded-full bg-brand-soft text-brand text-xs font-bold flex items-center justify-center border border-brand-border">
                             {idx + 1}
                           </div>
                           {idx < editTweets.length - 1 && (
-                            <div className="w-0.5 bg-sky-500/20 flex-grow my-1 border-dashed" />
+                            <div className="w-0.5 bg-brand-border flex-grow my-1 border-dashed" />
                           )}
                         </div>
                         <div className="flex-grow space-y-1">
@@ -947,17 +947,17 @@ export default function AdminPage() {
                             value={tweet}
                             onChange={(e) => handleTweetChange(idx, e.target.value)}
                             maxLength={4000}
-                            className="w-full bg-transparent p-0 text-slate-200 text-xs leading-relaxed focus:outline-none resize-none"
+                            className="w-full bg-transparent p-0 text-text text-xs leading-relaxed focus:outline-none resize-none"
                             placeholder="Nội dung tweet..."
                           />
-                          <div className="flex justify-between items-center text-[10px] text-slate-500">
+                          <div className="flex justify-between items-center text-[10px] text-text-3">
                             <span>{tweet.length}/4000 ký tự</span>
-                            {tweet.length > 4000 && <span className="text-rose-400">Vượt quá giới hạn!</span>}
+                            {tweet.length > 4000 && <span className="text-neg">Vượt quá giới hạn!</span>}
                           </div>
                         </div>
                         <button
                           onClick={() => handleRemoveTweet(idx)}
-                          className="text-slate-600 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition duration-150 absolute top-2 right-2 p-1"
+                          className="text-text-3 hover:text-neg opacity-0 group-hover:opacity-100 transition duration-150 absolute top-2 right-2 p-1 cursor-pointer"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -968,11 +968,11 @@ export default function AdminPage() {
 
                 {/* Attached Images */}
                 <div className="space-y-2">
-                  <label className="block text-xs font-semibold text-slate-400 uppercase">Hình ảnh đính kèm</label>
+                  <label className="block text-xs font-semibold text-text-3 uppercase">Hình ảnh đính kèm</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {selectedDraft.payload?.images?.map((img, i) => (
-                      <div key={i} className="bg-black/30 border border-white/5 rounded-xl p-3 flex items-center gap-3">
-                        <div className="relative h-12 w-20 shrink-0 bg-slate-800 rounded-lg overflow-hidden flex items-center justify-center text-[10px] text-slate-500 border border-white/5">
+                      <div key={i} className="bg-surface-2 border border-border rounded-xl p-3 flex items-center gap-3">
+                        <div className="relative h-12 w-20 shrink-0 bg-surface rounded-lg overflow-hidden flex items-center justify-center text-[10px] text-text-3 border border-border">
                           {img.url ? (
                             <img src={img.url} alt={img.role} className="object-cover h-full w-full" />
                           ) : (
@@ -980,13 +980,13 @@ export default function AdminPage() {
                           )}
                         </div>
                         <div className="text-xs truncate">
-                          <div className="font-semibold text-white capitalize">{img.role}</div>
+                          <div className="font-semibold text-text capitalize font-display">{img.role}</div>
                           {img.url ? (
-                            <a href={img.url} target="_blank" rel="noreferrer" className="text-indigo-400 hover:underline flex items-center gap-0.5 truncate max-w-[150px]">
+                            <a href={img.url} target="_blank" rel="noreferrer" className="text-brand hover:underline flex items-center gap-0.5 truncate max-w-[150px]">
                               {img.url}
                             </a>
                           ) : (
-                            <span className="text-slate-500 italic">Chưa tạo ảnh</span>
+                            <span className="text-text-3 italic">Chưa tạo ảnh</span>
                           )}
                         </div>
                       </div>

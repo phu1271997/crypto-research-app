@@ -82,9 +82,9 @@ export default function WatchlistPage() {
   };
 
   const getScoreStyles = (score: number) => {
-    if (score >= 80) return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
-    if (score >= 60) return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
-    return 'bg-rose-500/10 text-rose-400 border-rose-500/30';
+    if (score >= 80) return 'bg-pos-soft text-pos border-pos-bd';
+    if (score >= 60) return 'bg-warn-soft text-warn border-warn-bd';
+    return 'bg-neg-soft text-neg border-neg-bd';
   };
 
   const formatDate = (dateInput?: Date) => {
@@ -101,19 +101,19 @@ export default function WatchlistPage() {
       {/* Dashboard title header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white flex items-center gap-2">
-            <Database className="h-7 w-7 text-indigo-400" />
+          <h1 className="text-3xl font-display font-[800] tracking-tight text-text flex items-center gap-2">
+            <Database className="h-6 w-6 text-copper" />
             <span>Danh Sách Theo Dõi</span>
           </h1>
-          <p className="text-slate-400 text-sm mt-1">
+          <p className="text-text-3 text-xs sm:text-sm mt-1">
             Tổng hợp và so sánh điểm số các dự án crypto đã lưu trong database.
           </p>
         </div>
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/10 hover:bg-indigo-500 hover:shadow-indigo-500/20 active:scale-[0.98] transition-all self-start sm:self-auto"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand-2 to-brand hover:brightness-110 px-4 py-2.5 text-xs font-display font-semibold text-[#052e2a] shadow transition duration-200 self-start sm:self-auto"
         >
-          <Plus className="h-4.5 w-4.5" />
+          <Plus className="h-4 w-4" />
           Research Mới
         </Link>
       </div>
@@ -123,13 +123,13 @@ export default function WatchlistPage() {
         {/* Search input field */}
         <div className="sm:col-span-2 relative">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <Search className="h-4.5 w-4.5 text-slate-500" />
+            <Search className="h-4 w-4 text-text-3" />
           </div>
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="block w-full rounded-xl border border-white/10 bg-slate-900/60 py-2.5 pl-10 pr-4 text-sm text-slate-200 placeholder-slate-500 focus:border-indigo-500 focus:bg-slate-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all"
+            className="block w-full rounded-xl border border-border bg-surface py-2.5 pl-10 pr-4 text-sm text-text placeholder-text-3 focus:border-brand focus:bg-surface-2 focus:ring-0 focus:outline-none transition-all"
             placeholder="Tìm kiếm dự án theo tên hoặc website..."
           />
         </div>
@@ -137,12 +137,12 @@ export default function WatchlistPage() {
         {/* Sort Select list */}
         <div className="relative">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <ArrowUpDown className="h-4 w-4 text-slate-500" />
+            <ArrowUpDown className="h-4 w-4 text-text-3" />
           </div>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="block w-full rounded-xl border border-white/10 bg-slate-900/60 py-2.5 pl-9 pr-8 text-sm text-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all appearance-none cursor-pointer"
+            className="block w-full rounded-xl border border-border bg-surface py-2.5 pl-9 pr-8 text-sm text-text font-mono focus:border-brand focus:ring-0 focus:outline-none transition-all appearance-none cursor-pointer"
           >
             <option value="date_desc">Ngày phân tích: Mới nhất</option>
             <option value="date_asc">Ngày phân tích: Cũ nhất</option>
@@ -151,27 +151,27 @@ export default function WatchlistPage() {
           </select>
           {/* Custom chevron dropdown arrow */}
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-            <svg className="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="h-4 w-4 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </div>
         </div>
       </div>
 
-      {/* WATCHLIST TABLE VIEW CARD */}
-      <div className="glass-card rounded-2xl overflow-hidden">
+      {/* WATCHLIST LIST VIEW CARD */}
+      <div className="space-y-3">
         {loading && projects.length === 0 ? (
-          <div className="py-24 text-center">
-            <div className="h-10 w-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-slate-400 text-sm">Đang tải danh sách dự án...</p>
+          <div className="py-24 text-center bg-surface border border-border rounded-2xl">
+            <div className="h-8 w-8 border-2 border-brand border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-text-3 text-xs sm:text-sm font-mono">Đang tải danh sách dự án...</p>
           </div>
         ) : projects.length === 0 ? (
-          <div className="py-20 text-center px-4">
-            <div className="h-12 w-12 rounded-xl bg-slate-800/50 border border-white/5 text-slate-500 flex items-center justify-center mx-auto mb-4">
+          <div className="py-20 text-center px-4 bg-surface border border-border rounded-2xl">
+            <div className="h-12 w-12 rounded-xl bg-surface-2 border border-border text-text-3 flex items-center justify-center mx-auto mb-4">
               <AlertCircle className="h-6 w-6" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-1">Chưa có dự án nào</h3>
-            <p className="text-slate-400 text-sm max-w-sm mx-auto mb-6">
+            <h3 className="text-base font-display font-bold text-text mb-1">Chưa có dự án nào</h3>
+            <p className="text-text-3 text-xs sm:text-sm max-w-sm mx-auto mb-6">
               {search.trim() 
                 ? 'Không tìm thấy kết quả phù hợp với từ khóa tìm kiếm của bạn.' 
                 : 'Bắt đầu chấm điểm dự án đầu tiên của bạn để thêm vào danh sách theo dõi.'}
@@ -179,84 +179,68 @@ export default function WatchlistPage() {
             {!search.trim() && (
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-indigo-500 transition-all"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand-2 to-brand hover:brightness-110 px-5 py-2.5 text-xs font-display font-semibold text-[#052e2a] shadow transition duration-200"
               >
                 Tạo phân tích đầu tiên
               </Link>
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto w-full">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-white/5 bg-slate-900/30 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  <th className="py-4 px-6">Dự án</th>
-                  <th className="py-4 px-6 text-center">Điểm tổng</th>
-                  <th className="py-4 px-6">Khuyến nghị</th>
-                  <th className="py-4 px-6 text-center">Ngày research</th>
-                  <th className="py-4 px-6 text-right">Xóa</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {projects.map((proj) => (
-                  <tr
-                    key={proj.id}
-                    onClick={() => router.push(`/project/${proj.id}`)}
-                    className="hover:bg-indigo-600/[0.02] cursor-pointer active:bg-indigo-600/[0.04] transition-all duration-150"
-                  >
-                    {/* Project & Website Info */}
-                    <td className="py-4 px-6 max-w-xs">
-                      <div className="font-bold text-slate-200 text-sm sm:text-base mb-0.5 truncate hover:text-white transition-colors">
+          <div className="space-y-3">
+            {projects.map((proj) => {
+              const scoreColorClass = getScoreStyles(proj.total_score);
+              return (
+                <div
+                  key={proj.id}
+                  onClick={() => router.push(`/project/${proj.id}`)}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-surface border border-border hover:border-border-strong hover:bg-surface-hover transition duration-150 cursor-pointer shadow-sm"
+                >
+                  {/* Project & Website Info */}
+                  <div className="flex items-center gap-3.5">
+                    {/* Score box - 44px rounded square (11px radius) */}
+                    <div className={`h-11 w-11 rounded-[11px] border flex items-center justify-center font-display font-extrabold text-base shrink-0 ${scoreColorClass}`}>
+                      {proj.total_score}
+                    </div>
+                    <div>
+                      <h4 className="font-display font-bold text-sm sm:text-base text-text leading-none group-hover:text-brand transition-colors">
                         {proj.name}
-                      </div>
+                      </h4>
                       <a
                         href={proj.website.startsWith('http') ? proj.website : `https://${proj.website}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()} // Stop row navigating
-                        className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+                        className="font-mono text-[10px] text-text-3 mt-1.5 inline-flex items-center gap-1 hover:text-brand transition-colors"
                       >
                         <span className="truncate max-w-[150px]">{proj.website}</span>
-                        <ExternalLink className="h-3 w-3 shrink-0" />
+                        <ExternalLink className="h-2.5 w-2.5 shrink-0" />
                       </a>
-                    </td>
+                    </div>
+                  </div>
 
-                    {/* Total Score Badge */}
-                    <td className="py-4 px-6 text-center">
-                      <span className={`inline-flex items-center justify-center rounded-lg border px-2.5 py-1 text-sm font-bold w-12 ${getScoreStyles(proj.total_score)}`}>
-                        {proj.total_score}
-                      </span>
-                    </td>
+                  {/* Recommendation details */}
+                  <div className="flex-1 sm:px-6 font-mono text-xs uppercase tracking-wider text-text-2">
+                    {proj.recommendation}
+                  </div>
 
-                    {/* Recommendation details */}
-                    <td className="py-4 px-6 text-sm text-slate-300 max-w-xs sm:max-w-md">
-                      <div className="truncate font-medium text-xs sm:text-sm">
-                        {proj.recommendation}
-                      </div>
-                    </td>
+                  {/* Created Date & Actions */}
+                  <div className="flex items-center justify-between sm:justify-end gap-6 border-t border-border sm:border-0 pt-3 sm:pt-0">
+                    <div className="flex items-center gap-1.5 justify-center font-mono text-xs text-text-3">
+                      <Calendar className="h-3.5 w-3.5" />
+                      <span>{formatDate(proj.created_at)}</span>
+                    </div>
 
-                    {/* Created Date */}
-                    <td className="py-4 px-6 text-center text-xs sm:text-sm text-slate-400 whitespace-nowrap">
-                      <div className="inline-flex items-center gap-1.5 justify-center">
-                        <Calendar className="h-3.5 w-3.5 text-slate-500" />
-                        <span>{formatDate(proj.created_at)}</span>
-                      </div>
-                    </td>
-
-                    {/* Delete action trigger */}
-                    <td className="py-4 px-6 text-right">
-                      <button
-                        onClick={(e) => handleDelete(e, proj.id)}
-                        disabled={deleteId === proj.id}
-                        className="rounded-lg p-2 text-slate-500 hover:bg-rose-500/10 hover:text-rose-400 active:scale-95 disabled:opacity-50 transition-all focus:outline-none"
-                      >
-                        <Trash2 className="h-4.5 w-4.5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    <button
+                      onClick={(e) => handleDelete(e, proj.id)}
+                      disabled={deleteId === proj.id}
+                      className="rounded-lg p-2 text-text-3 hover:bg-neg-soft hover:text-neg transition duration-150 cursor-pointer disabled:opacity-50 shrink-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

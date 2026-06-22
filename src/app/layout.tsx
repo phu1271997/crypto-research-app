@@ -1,17 +1,28 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Sora, Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import Navbar from './components/Navbar';
 import { cookies } from 'next/headers';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const soraDisplay = Sora({
+  variable: '--font-display',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const interSans = Inter({
+  variable: '--font-sans',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-mono',
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -33,9 +44,9 @@ export default async function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+      className={`${soraDisplay.variable} ${interSans.variable} ${jetbrainsMono.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground selection:bg-indigo-500/30 selection:text-indigo-200">
+      <body className="min-h-full flex flex-col bg-bg text-text selection:bg-brand-soft selection:text-brand font-sans">
         {/* Navigation Bar */}
         <Navbar isAuthenticated={isAuthenticated} />
 
@@ -46,7 +57,7 @@ export default async function RootLayout({
 
         {/* Global Footer (Only visible when logged in to avoid duplicate footers on the landing page) */}
         {isAuthenticated && (
-          <footer className="border-t border-white/5 py-6 text-center text-xs text-slate-500 bg-[#04060b]/40 backdrop-blur-sm">
+          <footer className="border-t border-border py-6 text-center text-xs text-text-3 bg-[#04060b]/40 backdrop-blur-sm">
             <div className="mx-auto max-w-7xl px-4">
               <p>© {new Date().getFullYear()} Primus Research AI. Đánh giá tự động được cung cấp bởi OpenRouter & Gemini Online.</p>
             </div>

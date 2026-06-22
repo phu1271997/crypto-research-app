@@ -21,16 +21,12 @@ export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: 
     try {
       const res = await fetch('/api/auth/logout', { method: 'POST' });
       if (res.ok) {
-        // Use window.location to trigger a clean hard reload after logging out
         window.location.href = '/login';
       }
     } catch (err) {
       console.error('Logout failed:', err);
     }
   };
-
-  // Hide Navbar on the login page
-  if (pathname === '/login') return null;
 
   // Apply theme class to document element on mount and state changes
   useEffect(() => {
@@ -44,6 +40,9 @@ export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: 
     }
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  // Hide Navbar on the login page (moved below React Hooks to follow Rules of Hooks)
+  if (pathname === '/login') return null;
 
   const navItems = [
     {
@@ -64,24 +63,24 @@ export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: 
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-white/5 bg-background/70 backdrop-blur-md">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+    <nav className="sticky top-0 z-50 w-full border-b border-border bg-bg/82 backdrop-blur-md h-[62px] flex items-center">
+      <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8">
+        <div className="flex h-[62px] items-center justify-between">
           {/* Logo & Branding */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600/10 border border-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.1)] group-hover:bg-indigo-600/20 group-hover:shadow-[0_0_20px_rgba(99,102,241,0.2)] transition-all duration-300 overflow-hidden">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-brand-2 to-brand shadow-sm group-hover:scale-105 transition-transform duration-300 overflow-hidden">
                 <Image
                   src="/primus-logo.svg"
                   alt="Primus Logo"
-                  width={32}
-                  height={32}
-                  className="w-8 h-8 group-hover:scale-110 transition-transform duration-300"
+                  width={28}
+                  height={28}
+                  className="w-7 h-7"
                   priority
                 />
               </div>
-              <span className="text-lg sm:text-xl font-bold tracking-tight bg-gradient-to-r from-slate-50 via-slate-100 to-indigo-300 bg-clip-text text-transparent">
-                Primus Research <span className="text-indigo-400 font-medium">AI</span>
+              <span className="text-base sm:text-lg font-display font-bold tracking-tight text-text leading-none">
+                Primus Research <span className="text-brand font-medium">AI</span>
               </span>
             </Link>
           </div>
@@ -99,13 +98,13 @@ export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: 
                       <Link
                         key={item.path}
                         href={item.path}
-                        className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                        className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-display font-medium transition-all duration-200 border ${
                           isActive
-                            ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30'
-                            : 'text-slate-400 hover:bg-white/5 hover:text-slate-200 border border-transparent'
+                            ? 'bg-brand-soft text-brand border-brand-border'
+                            : 'text-text-2 hover:bg-surface-2 hover:text-text border-transparent'
                         }`}
                       >
-                        <Icon className="h-4 w-4" />
+                        <Icon className="h-3.5 w-3.5" />
                         {item.name}
                       </Link>
                     );
@@ -116,7 +115,7 @@ export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: 
               {/* Theme Switcher Toggle */}
               <button
                 onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-                className="flex items-center justify-center h-9 w-9 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition duration-200 cursor-pointer"
+                className="flex items-center justify-center h-9 w-9 rounded-lg border border-border bg-surface-2 text-text-2 hover:text-text hover:border-border-strong transition duration-200 cursor-pointer"
                 title={theme === 'light' ? 'Chuyển sang chế độ Tối' : 'Chuyển sang chế độ Sáng'}
               >
                 {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
@@ -126,7 +125,7 @@ export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: 
               {isAuthenticated ? (
                 <button
                   onClick={handleLogout}
-                  className="flex items-center justify-center h-9 w-9 rounded-lg border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/25 text-rose-400 transition duration-200 cursor-pointer"
+                  className="flex items-center justify-center h-9 w-9 rounded-lg border border-neg/20 bg-neg-soft text-neg hover:bg-neg-soft hover:border-neg/45 transition duration-200 cursor-pointer"
                   title="Đăng xuất"
                 >
                   <LogOut className="h-4 w-4" />
@@ -134,7 +133,7 @@ export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: 
               ) : (
                 <a
                   href="/login"
-                  className="flex items-center gap-2 rounded-lg border border-indigo-500 px-4 py-2 text-sm font-medium text-indigo-400 hover:bg-indigo-500/10 transition-all duration-200"
+                  className="flex items-center gap-2 rounded-lg border border-brand px-3 py-1.5 text-xs font-display font-semibold text-brand hover:bg-brand-soft transition-all duration-200"
                 >
                   Đăng Nhập
                 </a>
@@ -146,7 +145,7 @@ export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: 
           <div className="flex items-center gap-2 md:hidden">
             <button
               onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-              className="flex items-center justify-center h-9 w-9 rounded-lg border border-white/10 bg-white/5 text-slate-300 hover:text-white transition duration-200"
+              className="flex items-center justify-center h-9 w-9 rounded-lg border border-border bg-surface-2 text-text-2 hover:text-text transition duration-200"
               title={theme === 'light' ? 'Chuyển sang chế độ Tối' : 'Chuyển sang chế độ Sáng'}
             >
               {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
@@ -156,7 +155,7 @@ export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: 
               <>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center justify-center h-9 w-9 rounded-lg border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 text-rose-400 transition duration-200"
+                  className="flex items-center justify-center h-9 w-9 rounded-lg border border-neg/20 bg-neg-soft text-neg transition duration-200"
                   title="Đăng xuất"
                 >
                   <LogOut className="h-4 w-4" />
@@ -165,22 +164,22 @@ export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: 
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   type="button"
-                  className="inline-flex items-center justify-center rounded-lg p-2 text-slate-400 hover:bg-white/5 hover:text-slate-200 focus:outline-none"
+                  className="inline-flex items-center justify-center rounded-lg p-2 text-text-2 hover:bg-surface-2 hover:text-text focus:outline-none"
                   aria-controls="mobile-menu"
                   aria-expanded="false"
                 >
                   <span className="sr-only">Open main menu</span>
                   {mobileMenuOpen ? (
-                    <X className="block h-6 w-6" aria-hidden="true" />
+                    <X className="block h-5 w-5" aria-hidden="true" />
                   ) : (
-                    <Menu className="block h-6 w-6" aria-hidden="true" />
+                    <Menu className="block h-5 w-5" aria-hidden="true" />
                   )}
                 </button>
               </>
             ) : (
               <a
                 href="/login"
-                className="flex items-center gap-1.5 rounded-lg border border-indigo-500 px-3 py-1.5 text-xs font-semibold text-indigo-400 hover:bg-indigo-500/10 transition-all duration-200"
+                className="flex items-center gap-1.5 rounded-lg border border-brand px-3 py-1.5 text-xs font-display font-semibold text-brand hover:bg-brand-soft transition-all duration-200"
               >
                 Đăng Nhập
               </a>
@@ -191,7 +190,7 @@ export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: 
 
       {/* Mobile Menu */}
       {mobileMenuOpen && isAuthenticated && (
-        <div className="md:hidden border-b border-white/5 bg-background/95 backdrop-blur-lg" id="mobile-menu">
+        <div className="md:hidden border-b border-border bg-bg/95 backdrop-blur-lg w-full absolute top-[62px] left-0 z-50" id="mobile-menu">
           <div className="space-y-1 px-2 pb-3 pt-2">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -202,13 +201,13 @@ export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: 
                   key={item.path}
                   href={item.path}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium transition-all duration-200 ${
+                  className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-display font-medium transition-all duration-200 border ${
                     isActive
-                      ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30'
-                      : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
+                      ? 'bg-brand-soft text-brand border-brand-border'
+                      : 'text-text-2 hover:bg-surface-2 hover:text-text border-transparent'
                   }`}
                 >
-                  <Icon className="h-5 w-5" />
+                  <Icon className="h-4 w-4" />
                   {item.name}
                 </Link>
               );

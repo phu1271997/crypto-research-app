@@ -87,16 +87,14 @@ export default function ResearchPageClient() {
       {/* Page Branding Header */}
       {!result && !isLoading && (
         <div className="text-center space-y-4 max-w-2xl mx-auto mb-4 animate-in fade-in duration-500">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.15)] mb-2">
-            <Cpu className="h-6 w-6" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-brand-border bg-brand-soft px-3.5 py-1.5 font-mono text-xs uppercase tracking-wider text-brand shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand shadow-[0_0_0_3px_rgba(45,212,191,0.15)] animate-pulse" />
+            <span>Automated VC Due Diligence</span>
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-            Nghiên Cứu & Chấm Điểm
-            <span className="block mt-1 bg-gradient-to-r from-indigo-400 via-indigo-200 to-emerald-400 bg-clip-text text-transparent">
-              Crypto Dự Án Tự Động
-            </span>
+          <h1 className="font-display font-[800] text-3xl sm:text-4xl md:text-5xl text-text leading-tight tracking-tighter">
+            Nghiên Cứu &amp; Chấm Điểm <span className="text-brand">Crypto</span>
           </h1>
-          <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
+          <p className="text-text-2 text-sm sm:text-base leading-relaxed max-w-lg mx-auto">
             Hệ thống tự động hóa quy trình phân tích. Dán URL website dự án, AI sẽ tiến hành cào dữ liệu, thực hiện Web Search thời gian thực để chấm điểm chính xác và lưu hồ sơ theo dõi.
           </p>
         </div>
@@ -104,23 +102,23 @@ export default function ResearchPageClient() {
 
       {/* ERROR MESSAGE CARD */}
       {error && (
-        <div className="glass-card rounded-2xl p-4 border-rose-500/20 bg-rose-500/5 flex gap-3 items-start animate-shake">
-          <AlertCircle className="h-5 w-5 text-rose-400 shrink-0 mt-0.5" />
+        <div className="bg-surface border border-neg-bd rounded-2xl p-4 bg-neg-soft/30 flex gap-3 items-start animate-shake">
+          <AlertCircle className="h-5 w-5 text-neg shrink-0 mt-0.5" />
           <div>
-            <h4 className="text-sm font-bold text-rose-400">Không thể hoàn thành nghiên cứu</h4>
-            <p className="text-xs sm:text-sm text-slate-300 mt-1">{error}</p>
+            <h4 className="text-sm font-display font-bold text-neg">Không thể hoàn thành nghiên cứu</h4>
+            <p className="text-xs sm:text-sm text-text-2 mt-1 font-sans">{error}</p>
           </div>
         </div>
       )}
 
       {/* SAVED SUCCESS TOAST BANNER */}
       {savedSuccess && result && (
-        <div className="glass-card rounded-2xl p-4 border-emerald-500/20 bg-emerald-500/5 flex gap-3 items-start animate-fade-in">
-          <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />
+        <div className="bg-surface border border-pos-bd rounded-2xl p-4 bg-pos-soft/30 flex gap-3 items-start animate-fade-in">
+          <CheckCircle2 className="h-5 w-5 text-pos shrink-0 mt-0.5" />
           <div>
-            <h4 className="text-sm font-bold text-emerald-400">Nghiên cứu dự án thành công!</h4>
-            <p className="text-xs sm:text-sm text-slate-300 mt-0.5">
-              Hồ sơ dự án <span className="font-semibold text-white">{result.name}</span> đã tự động lưu trữ an toàn trong Database và được thêm vào Danh sách theo dõi.
+            <h4 className="text-sm font-display font-bold text-pos">Nghiên cứu dự án thành công!</h4>
+            <p className="text-xs sm:text-sm text-text-2 mt-0.5 font-sans">
+              Hồ sơ dự án <span className="font-semibold text-text">{result.name}</span> đã tự động lưu trữ an toàn trong Database và được thêm vào Danh sách theo dõi.
             </p>
           </div>
         </div>
@@ -140,7 +138,7 @@ export default function ResearchPageClient() {
                 setRawInput('');
                 setSavedSuccess(false);
               }}
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-800 border border-white/10 px-6 py-3 text-sm font-bold text-slate-200 hover:bg-slate-700 hover:text-white transition-all duration-200"
+              className="inline-flex items-center gap-2 rounded-xl bg-surface-2 border border-border-strong px-6 py-3 text-sm font-display font-semibold text-text-2 hover:text-text transition-all duration-200 cursor-pointer"
             >
               Phân tích dự án khác
               <ArrowRight className="h-4 w-4" />
@@ -151,23 +149,23 @@ export default function ResearchPageClient() {
 
       {/* DYNAMIC HIGH-TECH LOADING STATE CARD */}
       {isLoading && (
-        <div className="glass-card rounded-3xl p-8 sm:p-12 text-center border-indigo-500/20 shadow-[0_0_50px_rgba(99,102,241,0.05)] max-w-2xl mx-auto animate-pulse-slow">
+        <div className="bg-surface border border-border-strong rounded-3xl p-8 sm:p-12 text-center shadow-lg max-w-2xl mx-auto animate-pulse-slow">
           <div className="relative flex items-center justify-center h-20 w-20 mx-auto mb-8">
             {/* Pulsing visual outer rings */}
-            <div className="absolute inset-0 rounded-full border-4 border-indigo-500/10 animate-ping" />
-            <div className="absolute -inset-2 rounded-full border border-indigo-400/20 animate-spin [animation-duration:10s]" />
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-600/10 border border-indigo-500/30 text-indigo-400">
+            <div className="absolute inset-0 rounded-full border-4 border-brand-soft animate-ping" />
+            <div className="absolute -inset-2 rounded-full border border-brand/20 animate-spin [animation-duration:10s]" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-soft border border-brand/30 text-brand">
               <Sparkles className="h-8 w-8 animate-spin" />
             </div>
           </div>
           
-          <h3 className="text-2xl font-bold text-white mb-2">Đang phân tích dự án...</h3>
-          <p className="text-sm text-slate-400 max-w-sm mx-auto mb-8">
-            Quá trình cào website, kích hoạt tác vụ tìm kiếm Web Search & tổng hợp điểm số thường kéo dài từ 20 đến 40 giây.
+          <h3 className="text-2xl font-display font-bold text-text mb-2">Đang phân tích dự án...</h3>
+          <p className="text-sm text-text-2 max-w-sm mx-auto mb-8">
+            Quá trình cào website, kích hoạt tác vụ tìm kiếm Web Search &amp; tổng hợp điểm số thường kéo dài từ 20 đến 40 giây.
           </p>
 
           {/* Dynamic Interactive Stepper */}
-          <div className="space-y-4 max-w-md mx-auto text-left bg-slate-900/50 border border-white/5 rounded-2xl p-5">
+          <div className="space-y-4 max-w-md mx-auto text-left bg-surface-2 border border-border rounded-2xl p-5 font-mono">
             {loadingSteps.map((step, index) => {
               const isCompleted = index < loadingStep;
               const isCurrent = index === loadingStep;
@@ -176,16 +174,16 @@ export default function ResearchPageClient() {
                 <div 
                   key={index} 
                   className={`flex gap-3 text-xs sm:text-sm items-start transition-opacity duration-300 ${
-                    isCompleted ? 'text-slate-500' : isCurrent ? 'text-indigo-400 font-semibold' : 'text-slate-700'
+                    isCompleted ? 'text-text-3' : isCurrent ? 'text-brand font-semibold' : 'text-text-3/40'
                   }`}
                 >
                   <div className="shrink-0 mt-0.5">
                     {isCompleted ? (
-                      <CheckCircle2 className="h-4.5 w-4.5 text-slate-600" />
+                      <CheckCircle2 className="h-4.5 w-4.5 text-brand" />
                     ) : isCurrent ? (
-                      <div className="h-4.5 w-4.5 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin" />
+                      <div className="h-4.5 w-4.5 rounded-full border-2 border-brand border-t-transparent animate-spin" />
                     ) : (
-                      <div className="h-4.5 w-4.5 rounded-full border border-slate-700 bg-transparent" />
+                      <div className="h-4.5 w-4.5 rounded-full border border-border bg-transparent" />
                     )}
                   </div>
                   <span>{step}</span>
@@ -198,51 +196,69 @@ export default function ResearchPageClient() {
 
       {/* INPUT FORM BLOCK */}
       {!result && !isLoading && (
-        <form onSubmit={handleSubmit} className="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-surface border border-border rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
           <div className="space-y-5">
-            {/* Website URL Input */}
+            {/* Website URL Input - Terminal Command Line Style */}
             <div className="space-y-2">
-              <label htmlFor="website-url" className="block text-sm font-bold text-slate-200">
-                Website URL của dự án <span className="text-indigo-400">*</span>
+              <label htmlFor="website-url" className="block font-mono text-[10px] text-text-3 uppercase tracking-wider">
+                Website URL của dự án
               </label>
-              <div className="relative rounded-xl shadow-sm">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                  <Search className="h-5 w-5 text-slate-500" />
+              
+              {/* Terminal Box */}
+              <div className="bg-surface border border-border-strong rounded-2xl shadow-sm overflow-hidden w-full">
+                {/* Terminal Header */}
+                <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border font-mono text-[10px] text-text-3 uppercase tracking-wider bg-bg/40 select-none">
+                  <span className="w-2 h-2 rounded-full bg-neg" />
+                  <span className="w-2 h-2 rounded-full bg-warn" />
+                  <span className="w-2 h-2 rounded-full bg-pos" />
+                  <span className="ml-2 font-mono text-text-3">primus://due-diligence — live scan</span>
                 </div>
-                <input
-                  type="text"
-                  name="website-url"
-                  id="website-url"
-                  required
-                  value={websiteUrl}
-                  onChange={(e) => setWebsiteUrl(e.target.value)}
-                  className="block w-full rounded-xl border border-white/10 bg-slate-950/60 py-3.5 pl-11 pr-4 text-slate-200 placeholder-slate-500 focus:border-indigo-500 focus:bg-slate-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none text-sm transition-all animate-in fade-in duration-300"
-                  placeholder="Ví dụ: monad.xyz, scroll.io, elizaos.ai..."
-                />
+                {/* Terminal Input Body */}
+                <div className="flex items-stretch bg-bg/10">
+                  <span className="flex items-center pl-4 font-mono font-bold text-brand text-base select-none">&gt;</span>
+                  <input
+                    type="text"
+                    name="website-url"
+                    id="website-url"
+                    required
+                    value={websiteUrl}
+                    onChange={(e) => setWebsiteUrl(e.target.value)}
+                    className="flex-grow bg-transparent border-0 outline-none text-text font-mono text-sm sm:text-base py-4 px-3 placeholder-text-3 w-full focus:ring-0 focus:outline-none"
+                    placeholder="https://project.xyz — dán website dự án cần phân tích"
+                  />
+                  {/* Action Button inside Terminal */}
+                  <button
+                    type="submit"
+                    disabled={!websiteUrl.trim()}
+                    className="inline-flex items-center gap-2 font-display font-semibold text-sm bg-gradient-to-r from-brand-2 to-brand hover:brightness-110 text-[#052e2a] px-6 py-4 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shrink-0"
+                  >
+                    <Search className="h-4 w-4 stroke-[#052e2a] fill-none stroke-[2]" />
+                    <span>Phân tích</span>
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Model Selection Dropdown Input */}
             <div className="space-y-2">
-              <label htmlFor="model-select" className="block text-sm font-bold text-slate-200 flex items-center gap-1.5">
-                <Brain className="h-4 w-4 text-indigo-400" />
-                <span>Mô hình AI nghiên cứu (OpenRouter)</span>
+              <label htmlFor="model-select" className="block font-mono text-[10px] text-text-3 uppercase tracking-wider">
+                Mô hình AI nghiên cứu (OpenRouter)
               </label>
               <div className="relative">
                 <select
                   id="model-select"
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
-                  className="block w-full rounded-xl border border-white/10 bg-slate-950/60 py-3 px-4 text-sm text-slate-200 focus:border-indigo-500 focus:bg-slate-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all appearance-none cursor-pointer"
+                  className="block w-full rounded-xl border border-border bg-surface-2 py-3.5 px-4 text-sm text-text font-mono focus:border-brand focus:bg-surface focus:outline-none transition-all appearance-none cursor-pointer"
                 >
                   {OPENROUTER_MODELS.map((model) => (
-                    <option key={model.id} value={model.id} className="bg-slate-900 text-slate-200 text-xs sm:text-sm">
-                      {model.name} — (Input: ${model.inputPrice} | Output: ${model.outputPrice} /M tokens)
+                    <option key={model.id} value={model.id} className="bg-[#111a2e] text-text-2 text-xs sm:text-sm">
+                      {model.name} — (In: ${model.inputPrice} | Out: ${model.outputPrice} /M)
                     </option>
                   ))}
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                  <svg className="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-4 w-4 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
@@ -251,8 +267,8 @@ export default function ResearchPageClient() {
 
             {/* Supplemental Context Area */}
             <div className="space-y-2">
-              <label htmlFor="raw-input" className="block text-sm font-bold text-slate-200">
-                Thông tin bổ sung dự án <span className="text-slate-500 font-normal text-xs">(Không bắt buộc)</span>
+              <label htmlFor="raw-input" className="block font-mono text-[10px] text-text-3 uppercase tracking-wider">
+                Thông tin bổ sung dự án <span className="text-text-3 font-normal font-sans">(Không bắt buộc)</span>
               </label>
               <textarea
                 name="raw-input"
@@ -260,25 +276,10 @@ export default function ResearchPageClient() {
                 rows={6}
                 value={rawInput}
                 onChange={(e) => setRawInput(e.target.value)}
-                className="block w-full rounded-xl border border-white/10 bg-slate-950/60 p-4 text-slate-200 placeholder-slate-500 focus:border-indigo-500 focus:bg-slate-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none text-sm leading-relaxed transition-all resize-none"
+                className="block w-full rounded-xl border border-border bg-surface-2 p-4 text-text placeholder-text-3 focus:border-brand focus:bg-surface focus:outline-none text-sm leading-relaxed transition-all resize-none font-sans"
                 placeholder="Dán thêm các thông tin quan trọng về dự án tại đây (Ví dụ: backer chính, lượng funding công bố, tokenomics allocation, roadmap, dự kiến ra token, doanh thu dự tính...) để AI có thêm dữ liệu kiểm tra và đối chiếu chéo tốt nhất..."
               />
             </div>
-          </div>
-
-          {/* Submit action */}
-          <div className="pt-2">
-            <button
-              type="submit"
-              disabled={!websiteUrl.trim()}
-              className="relative w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-4 text-sm font-black tracking-wide text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.99] group overflow-hidden"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                Bắt đầu Research & Chấm điểm
-                <Sparkles className="h-4.5 w-4.5 text-indigo-200 animate-pulse group-hover:scale-110 transition-transform" />
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-700 via-indigo-600 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </button>
           </div>
         </form>
       )}

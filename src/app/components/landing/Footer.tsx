@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
 
 export default function Footer() {
@@ -37,24 +36,24 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-xs text-slate-500">
               <li>
-                <Link href="/login" className="hover:text-indigo-400 transition-colors">
+                <a href="/login" className="hover:text-indigo-400 transition-colors">
                   Research Dự Án
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/list" className="hover:text-indigo-400 transition-colors">
+                <a href="/list" className="hover:text-indigo-400 transition-colors">
                   Watchlist Theo Dõi
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/login" className="hover:text-indigo-400 transition-colors">
+                <a href="/login" className="hover:text-indigo-400 transition-colors">
                   Weekly Track
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/admin" className="hover:text-indigo-400 transition-colors">
+                <a href="/admin" className="hover:text-indigo-400 transition-colors">
                   Viết Bài & Social Bot
-                </Link>
+                </a>
               </li>
             </ul>
           </div>

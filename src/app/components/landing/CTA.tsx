@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
 
 export default function CTA() {
@@ -43,13 +42,13 @@ export default function CTA() {
             </p>
 
             <div className="pt-2">
-              <Link
+              <a
                 href="/login"
                 className="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-slate-100 text-indigo-950 px-8 py-4 text-sm font-bold shadow-lg hover:scale-105 active:scale-[0.98] transition-all duration-200"
               >
                 <span>Bắt Đầu Ngay</span>
                 <ArrowRight className="h-4.5 w-4.5" />
-              </Link>
+              </a>
             </div>
 
           </div>

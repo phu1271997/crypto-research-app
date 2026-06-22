@@ -1,7 +1,6 @@
 'use client';
 
-import Link from 'next/link';
-import { ArrowRight, ChevronRight, Play, Sparkles, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export default function Hero() {
   const scrollToHowItWorks = (e: React.MouseEvent) => {
@@ -56,13 +55,13 @@ export default function Hero() {
 
             {/* CTA Actions */}
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
-              <Link
+              <a
                 href="/login"
                 className="group flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 px-8 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-500/20 active:scale-[0.98] transition-all duration-200"
               >
                 <span>Bắt Đầu Research</span>
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
+              </a>
               
               <a
                 href="#how-it-works"

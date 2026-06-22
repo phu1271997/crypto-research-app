@@ -21,8 +21,8 @@ export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: 
     try {
       const res = await fetch('/api/auth/logout', { method: 'POST' });
       if (res.ok) {
-        router.push('/login');
-        router.refresh();
+        // Use window.location to trigger a clean hard reload after logging out
+        window.location.href = '/login';
       }
     } catch (err) {
       console.error('Logout failed:', err);
@@ -132,12 +132,12 @@ export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: 
                   <LogOut className="h-4 w-4" />
                 </button>
               ) : (
-                <Link
+                <a
                   href="/login"
                   className="flex items-center gap-2 rounded-lg border border-indigo-500 px-4 py-2 text-sm font-medium text-indigo-400 hover:bg-indigo-500/10 transition-all duration-200"
                 >
                   Đăng Nhập
-                </Link>
+                </a>
               )}
             </div>
           </div>
@@ -178,12 +178,12 @@ export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: 
                 </button>
               </>
             ) : (
-              <Link
+              <a
                 href="/login"
                 className="flex items-center gap-1.5 rounded-lg border border-indigo-500 px-3 py-1.5 text-xs font-semibold text-indigo-400 hover:bg-indigo-500/10 transition-all duration-200"
               >
                 Đăng Nhập
-              </Link>
+              </a>
             )}
           </div>
         </div>

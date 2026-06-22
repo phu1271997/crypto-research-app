@@ -8,11 +8,11 @@ import WhyPrimus from './WhyPrimus';
 import CTA from './CTA';
 import Footer from './Footer';
 
-export default function LandingPage() {
+export default function LandingPage({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
   return (
     <div className="flex flex-col min-h-screen text-slate-100 bg-[#0A0A1A] -mx-4 sm:-mx-6 lg:-mx-8 -my-8 overflow-hidden select-none">
       {/* Hero Section */}
-      <Hero />
+      <Hero isAuthenticated={isAuthenticated} />
 
       {/* Stats Bar */}
       <Stats />
@@ -27,7 +27,7 @@ export default function LandingPage() {
       <WhyPrimus />
 
       {/* CTA Section */}
-      <CTA />
+      <CTA isAuthenticated={isAuthenticated} />
 
       {/* Footer Section */}
       <Footer />

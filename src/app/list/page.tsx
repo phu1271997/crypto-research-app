@@ -110,7 +110,7 @@ export default function WatchlistPage() {
           </p>
         </div>
         <Link
-          href="/"
+          href="/research"
           className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand-2 to-brand hover:brightness-110 px-4 py-2.5 text-xs font-display font-semibold text-[#052e2a] shadow transition duration-200 self-start sm:self-auto"
         >
           <Plus className="h-4 w-4" />
@@ -178,7 +178,7 @@ export default function WatchlistPage() {
             </p>
             {!search.trim() && (
               <Link
-                href="/"
+                href="/research"
                 className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand-2 to-brand hover:brightness-110 px-5 py-2.5 text-xs font-display font-semibold text-[#052e2a] shadow transition duration-200"
               >
                 Tạo phân tích đầu tiên

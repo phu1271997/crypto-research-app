@@ -1,6 +1,6 @@
 'use client';
 
-export default function Hero() {
+export default function Hero({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
   const scrollToHowItWorks = (e: React.MouseEvent) => {
     e.preventDefault();
     const element = document.getElementById('how-it-works');
@@ -47,7 +47,7 @@ export default function Hero() {
             {/* CTA Actions */}
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
               <a
-                href="/login"
+                href={isAuthenticated ? "/research" : "/login"}
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-2 to-brand hover:brightness-110 px-8 py-3.5 text-sm font-display font-semibold text-[#052e2a] shadow transition duration-200 cursor-pointer"
               >
                 <span>Bắt Đầu Research</span>

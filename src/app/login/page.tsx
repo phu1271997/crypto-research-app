@@ -31,7 +31,7 @@ function LoginForm() {
 
       if (res.ok && data.success) {
         // Successful login, redirect to requested page or home
-        const nextPath = searchParams.get('next') || '/';
+        const nextPath = searchParams.get('next') || '/research';
         router.push(nextPath);
         router.refresh();
       } else {

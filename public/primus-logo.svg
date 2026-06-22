@@ -1,23 +1,55 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
   <defs>
-    <linearGradient id="primus-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#818cf8;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#6366f1;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#4f46e5;stop-opacity:1" />
+    <!-- Teal Gradient (Left/Top) -->
+    <linearGradient id="teal-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2dd4bf;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#14b8a6;stop-opacity:1" />
     </linearGradient>
-    <linearGradient id="primus-grad2" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#a5b4fc;stop-opacity:0.8" />
-      <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+    <!-- Teal Gradient (Right/Top) -->
+    <linearGradient id="teal-grad-2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#14b8a6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f766e;stop-opacity:1" />
+    </linearGradient>
+    <!-- Copper Gradient (Left/Bottom) -->
+    <linearGradient id="copper-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c8915a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a96f33;stop-opacity:1" />
+    </linearGradient>
+    <!-- Copper Gradient (Right/Bottom) -->
+    <linearGradient id="copper-grad-2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#a96f33;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#854d0e;stop-opacity:1" />
+    </linearGradient>
+    <!-- Inner Core Gradient -->
+    <linearGradient id="core-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#2dd4bf;stop-opacity:1" />
     </linearGradient>
   </defs>
-  <!-- Left triangle -->
-  <polygon points="10,55 38,55 24,85" fill="url(#primus-grad)" opacity="0.85"/>
-  <!-- Right triangle -->
-  <polygon points="62,55 90,55 76,85" fill="url(#primus-grad)" opacity="0.85"/>
-  <!-- Center diamond -->
-  <polygon points="50,20 62,50 50,70 38,50" fill="url(#primus-grad2)"/>
-  <!-- Top left accent -->
-  <polygon points="32,35 42,35 37,45" fill="url(#primus-grad2)" opacity="0.7"/>
-  <!-- Top right accent -->
-  <polygon points="58,35 68,35 63,45" fill="url(#primus-grad2)" opacity="0.7"/>
+
+  <!-- 3D Geometric Facets (Octahedron crystal block) -->
+  <!-- Top Left Facet -->
+  <polygon points="50,15 20,50 50,50" fill="url(#teal-grad-1)" />
+  <!-- Top Right Facet -->
+  <polygon points="50,15 80,50 50,50" fill="url(#teal-grad-2)" />
+  <!-- Bottom Left Facet -->
+  <polygon points="20,50 50,85 50,50" fill="url(#copper-grad-1)" />
+  <!-- Bottom Right Facet -->
+  <polygon points="80,50 50,85 50,50" fill="url(#copper-grad-2)" />
+
+  <!-- Inner Floating Core (Diamond) -->
+  <polygon points="50,32 63,50 50,68 37,50" fill="url(#core-grad)" opacity="0.9" />
+  
+  <!-- Outer Blockchain Network node connections -->
+  <line x1="50" y1="15" x2="80" y2="50" stroke="#2dd4bf" stroke-width="2" stroke-dasharray="1 3" />
+  <line x1="80" y1="50" x2="50" y2="85" stroke="#c8915a" stroke-width="2" stroke-dasharray="1 3" />
+  <line x1="50" y1="85" x2="20" y2="50" stroke="#c8915a" stroke-width="2" stroke-dasharray="1 3" />
+  <line x1="20" y1="50" x2="50" y2="15" stroke="#2dd4bf" stroke-width="2" stroke-dasharray="1 3" />
+
+  <!-- Node points -->
+  <circle cx="50" cy="15" r="4.5" fill="#2dd4bf" />
+  <circle cx="80" cy="50" r="4.5" fill="#2dd4bf" />
+  <circle cx="50" cy="85" r="4.5" fill="#c8915a" />
+  <circle cx="20" cy="50" r="4.5" fill="#2dd4bf" />
+  <circle cx="50" cy="50" r="3.5" fill="#ffffff" />
 </svg>

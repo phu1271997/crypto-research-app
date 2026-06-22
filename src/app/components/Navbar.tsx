@@ -47,7 +47,7 @@ export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: 
   const navItems = [
     {
       name: 'Research Dự Án',
-      path: '/',
+      path: '/research',
       icon: Cpu,
     },
     {

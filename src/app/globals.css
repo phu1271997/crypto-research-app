@@ -1,26 +1,250 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Premium Deep Slate / Cyberpunk Dark Theme variables */
+  --background: #060913;
+  --foreground: #f8fafc;
+  
+  --card: #0d1326;
+  --card-border: rgba(255, 255, 255, 0.06);
+  --card-glow: rgba(59, 130, 246, 0.05);
+
+  --accent-green: #10b981; /* emerald-500 */
+  --accent-yellow: #f59e0b; /* amber-500 */
+  --accent-red: #f43f5e; /* rose-500 */
+
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+}
+
+/* Custom CSS Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(13, 19, 38, 0.5);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(30, 41, 59, 0.3) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(13, 148, 136, 0.1) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(99, 102, 241, 0.05) 0px, transparent 50%);
+  background-attachment: fixed;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card-bg: var(--card);
+  --color-card-border: var(--card-border);
+  --color-card-glow: var(--card-glow);
+  --color-score-green: var(--accent-green);
+  --color-score-yellow: var(--accent-yellow);
+  --color-score-red: var(--accent-red);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Pulse animation for loading states */
+@keyframes loadingPulse {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.98);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.animate-pulse-slow {
+  animation: loadingPulse 3s infinite ease-in-out;
 }
+
+/* Custom Glass Card Class */
+.glass-card {
+  background: rgba(13, 19, 38, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(99, 102, 241, 0.2);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 15px rgba(99, 102, 241, 0.05);
+}
+
+/* Accent Glows for scoring badges */
+.glow-green {
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+}
+.glow-yellow {
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+}
+.glow-red {
+  box-shadow: 0 0 15px rgba(244, 63, 94, 0.2);
+}
+
+/* --- LIGHT THEME STYLING OVERRIDES --- */
+.light {
+  color-scheme: light;
+  
+  --background: #f1f5f9; /* slate-100 */
+  --foreground: #0f172a; /* slate-900 */
+  --card: #ffffff;
+  --card-border: rgba(15, 23, 42, 0.08);
+  --card-glow: rgba(59, 130, 246, 0.02);
+}
+
+.light body {
+  background-color: #f1f5f9;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(203, 213, 225, 0.4) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(204, 251, 241, 0.4) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(224, 231, 255, 0.3) 0px, transparent 50%);
+  color: #0f172a;
+}
+
+/* Light mode panels & cards override */
+.light .bg-\[\#0a0f1d\],
+.light .bg-\[\#0d1326\],
+.light .bg-\[\#060913\],
+.light .bg-\[\#04060b\]\/40,
+.light .glass-card,
+.light .bg-slate-900,
+.light .bg-black\/40,
+.light .bg-black\/20,
+.light .bg-black\/30 {
+  background-color: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05) !important;
+}
+
+.light .glass-card:hover {
+  border-color: rgba(99, 102, 241, 0.3) !important;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08), 0 0 15px rgba(99, 102, 241, 0.05) !important;
+}
+
+/* Typography override */
+.light .text-white,
+.light .text-slate-50,
+.light .text-slate-100 {
+  color: #0f172a !important;
+}
+
+.light .text-slate-200 {
+  color: #1e293b !important;
+}
+
+.light .text-slate-300 {
+  color: #334155 !important;
+}
+
+.light .text-slate-400 {
+  color: #64748b !important;
+}
+
+.light .text-indigo-300 {
+  color: #4f46e5 !important; /* indigo-600 */
+}
+
+.light .text-indigo-400 {
+  color: #6366f1 !important; /* indigo-500 */
+}
+
+/* Borders override */
+.light .border-white\/5,
+.light .border-white\/10,
+.light .border-white\/20 {
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Form input fields override */
+.light input,
+.light textarea,
+.light select {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: rgba(15, 23, 42, 0.15) !important;
+}
+
+.light input:focus,
+.light textarea:focus,
+.light select:focus {
+  border-color: #4f46e5 !important;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1) !important;
+}
+
+.light input::placeholder,
+.light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Sub-panels & details override */
+.light .bg-white\/5 {
+  background-color: rgba(15, 23, 42, 0.04) !important;
+}
+
+.light .bg-indigo-600\/10 {
+  background-color: rgba(79, 70, 229, 0.08) !important;
+}
+
+.light .bg-indigo-600\/20 {
+  background-color: rgba(79, 70, 229, 0.15) !important;
+}
+
+.light .bg-emerald-500\/10 {
+  background-color: rgba(16, 185, 129, 0.08) !important;
+}
+
+.light .bg-rose-500\/10 {
+  background-color: rgba(244, 63, 94, 0.08) !important;
+}
+
+.light .bg-amber-500\/10 {
+  background-color: rgba(245, 158, 11, 0.08) !important;
+}
+
+.light .bg-indigo-500\/5 {
+  background-color: rgba(79, 70, 229, 0.04) !important;
+}
+
+.light .hover\:bg-indigo-500\/10:hover {
+  background-color: rgba(79, 70, 229, 0.08) !important;
+}
+
+.light .bg-black\/60 {
+  background-color: #f8fafc !important;
+}
+
+.light .divide-white\/5 > * + * {
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+.light .bg-indigo-600\/5 {
+  background-color: rgba(79, 70, 229, 0.04) !important;
+}
+
+.light .hover\:bg-white\/10:hover {
+  background-color: rgba(15, 23, 42, 0.06) !important;
+}
+
+/* Title gradients override for readability in light mode */
+.light .bg-gradient-to-r.from-slate-50.via-slate-100.to-indigo-300 {
+  background-image: linear-gradient(to right, #0f172a, #1e293b, #4f46e5) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+

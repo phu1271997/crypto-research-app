@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="primus-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#818cf8;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4f46e5;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="primus-grad2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#a5b4fc;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Left triangle -->
+  <polygon points="10,55 38,55 24,85" fill="url(#primus-grad)" opacity="0.85"/>
+  <!-- Right triangle -->
+  <polygon points="62,55 90,55 76,85" fill="url(#primus-grad)" opacity="0.85"/>
+  <!-- Center diamond -->
+  <polygon points="50,20 62,50 50,70 38,50" fill="url(#primus-grad2)"/>
+  <!-- Top left accent -->
+  <polygon points="32,35 42,35 37,45" fill="url(#primus-grad2)" opacity="0.7"/>
+  <!-- Top right accent -->
+  <polygon points="58,35 68,35 63,45" fill="url(#primus-grad2)" opacity="0.7"/>
+</svg>

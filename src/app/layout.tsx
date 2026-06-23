@@ -4,6 +4,8 @@ import './globals.css';
 import Navbar from './components/Navbar';
 import { cookies } from 'next/headers';
 
+import { ResearchProvider } from '@/context/ResearchContext';
+
 const soraDisplay = Sora({
   variable: '--font-display',
   subsets: ['latin'],
@@ -47,22 +49,24 @@ export default async function RootLayout({
       className={`${soraDisplay.variable} ${interSans.variable} ${jetbrainsMono.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col bg-bg text-text selection:bg-brand-soft selection:text-brand font-sans">
-        {/* Navigation Bar */}
-        <Navbar isAuthenticated={isAuthenticated} />
+        <ResearchProvider>
+          {/* Navigation Bar */}
+          <Navbar isAuthenticated={isAuthenticated} />
 
-        {/* Core Main Viewport */}
-        <main className="flex-grow mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-          {children}
-        </main>
+          {/* Core Main Viewport */}
+          <main className="flex-grow mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+            {children}
+          </main>
 
-        {/* Global Footer (Only visible when logged in to avoid duplicate footers on the landing page) */}
-        {isAuthenticated && (
-          <footer className="border-t border-border py-6 text-center text-xs text-text-3 bg-[#04060b]/40 backdrop-blur-sm">
-            <div className="mx-auto max-w-7xl px-4">
-              <p>© {new Date().getFullYear()} Primus Research AI. Đánh giá tự động được cung cấp bởi OpenRouter & Gemini Online.</p>
-            </div>
-          </footer>
-        )}
+          {/* Global Footer (Only visible when logged in to avoid duplicate footers on the landing page) */}
+          {isAuthenticated && (
+            <footer className="border-t border-border py-6 text-center text-xs text-text-3 bg-[#04060b]/40 backdrop-blur-sm">
+              <div className="mx-auto max-w-7xl px-4">
+                <p>© {new Date().getFullYear()} Primus Research AI. Đánh giá tự động được cung cấp bởi OpenRouter & Gemini Online.</p>
+              </div>
+            </footer>
+          )}
+        </ResearchProvider>
       </body>
     </html>
   );

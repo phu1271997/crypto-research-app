@@ -1,21 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { analyzeProjectAction } from '@/app/actions';
+import { useState } from 'react';
 import { Project } from '@/lib/db';
 import ProjectResult from '@/app/components/ProjectResult';
 import { OPENROUTER_MODELS } from '@/lib/openrouter';
 import { Cpu, Search, Sparkles, AlertCircle, CheckCircle2, ArrowRight, Brain } from 'lucide-react';
+import { useResearch } from '@/context/ResearchContext';
 
 export default function ResearchPageClient() {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [rawInput, setRawInput] = useState('');
   const [selectedModel, setSelectedModel] = useState('google/gemini-3-flash-preview:online');
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadingStep, setLoadingStep] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<Project | null>(null);
-  const [savedSuccess, setSavedSuccess] = useState(false);
+
+  const {
+    isResearching,
+    researchResult: result,
+    researchError: error,
+    savedSuccess,
+    loadingStep,
+    startResearch,
+    resetResearch
+  } = useResearch();
 
   // Resolve active model name for dynamic loading display
   const activeModelName = OPENROUTER_MODELS.find(m => m.id === selectedModel)?.name.split(' (')[0].split(' —')[0] || 'AI';
@@ -31,61 +36,16 @@ export default function ResearchPageClient() {
     'Đang hoàn tất lưu báo cáo tự động vào hệ thống database...'
   ];
 
-  // Rotate loading steps every 4.5 seconds for engaging UX
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isLoading) {
-      setLoadingStep(0);
-      interval = setInterval(() => {
-        setLoadingStep((prev) => {
-          if (prev < loadingSteps.length - 1) {
-            return prev + 1;
-          }
-          return prev;
-        });
-      }, 4500);
-    }
-    return () => clearInterval(interval);
-  }, [isLoading, loadingSteps.length]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!websiteUrl.trim()) return;
-
-    setIsLoading(true);
-    setError(null);
-    setResult(null);
-    setSavedSuccess(false);
-
-    try {
-      // Trigger Next.js Server Action with selected model
-      const result = await analyzeProjectAction(websiteUrl.trim(), rawInput.trim(), selectedModel);
-      
-      if (!result.success) {
-        // Server Action returned a structured error (not thrown, so message is preserved)
-        setError(result.error);
-        return;
-      }
-      
-      setResult(result.data);
-      setSavedSuccess(true);
-      // Scroll to top of result smooth
-      setTimeout(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }, 100);
-    } catch (err: any) {
-      console.error(err);
-      // Fallback for unexpected errors (network, etc.)
-      setError(err.message || 'Đã xảy ra lỗi không xác định khi nghiên cứu dự án.');
-    } finally {
-      setIsLoading(false);
-    }
+    startResearch(websiteUrl.trim(), rawInput.trim(), selectedModel);
   };
 
   return (
     <div className="space-y-10 py-4 max-w-4xl mx-auto">
       {/* Page Branding Header */}
-      {!result && !isLoading && (
+      {!result && !isResearching && (
         <div className="text-center space-y-4 max-w-2xl mx-auto mb-4 animate-in fade-in duration-500">
           <div className="inline-flex items-center gap-2 rounded-full border border-brand-border bg-brand-soft px-3.5 py-1.5 font-mono text-xs uppercase tracking-wider text-brand shadow-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-brand shadow-[0_0_0_3px_rgba(45,212,191,0.15)] animate-pulse" />
@@ -125,7 +85,7 @@ export default function ResearchPageClient() {
       )}
 
       {/* MAIN RESULT DISPLAY */}
-      {result && !isLoading && (
+      {result && !isResearching && (
         <div className="space-y-6">
           <ProjectResult project={result} />
           
@@ -133,10 +93,9 @@ export default function ResearchPageClient() {
           <div className="flex justify-center pt-4">
             <button
               onClick={() => {
-                setResult(null);
+                resetResearch();
                 setWebsiteUrl('');
                 setRawInput('');
-                setSavedSuccess(false);
               }}
               className="inline-flex items-center gap-2 rounded-xl bg-surface-2 border border-border-strong px-6 py-3 text-sm font-display font-semibold text-text-2 hover:text-text transition-all duration-200 cursor-pointer"
             >
@@ -148,7 +107,7 @@ export default function ResearchPageClient() {
       )}
 
       {/* DYNAMIC HIGH-TECH LOADING STATE CARD */}
-      {isLoading && (
+      {isResearching && (
         <div className="bg-surface border border-border-strong rounded-3xl p-8 sm:p-12 text-center shadow-lg max-w-2xl mx-auto animate-pulse-slow">
           <div className="relative flex items-center justify-center h-20 w-20 mx-auto mb-8">
             {/* Pulsing visual outer rings */}
@@ -195,7 +154,7 @@ export default function ResearchPageClient() {
       )}
 
       {/* INPUT FORM BLOCK */}
-      {!result && !isLoading && (
+      {!result && !isResearching && (
         <form onSubmit={handleSubmit} className="bg-surface border border-border rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
           <div className="space-y-5">
             {/* Website URL Input - Terminal Command Line Style */}

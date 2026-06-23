@@ -187,7 +187,7 @@ export default function WatchlistPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {projects.map((proj) => {
+            {projects.map((proj, idx) => {
               const scoreColorClass = getScoreStyles(proj.total_score);
               return (
                 <div
@@ -202,8 +202,9 @@ export default function WatchlistPage() {
                       {proj.total_score}
                     </div>
                     <div>
-                      <h4 className="font-display font-bold text-sm sm:text-base text-text leading-none group-hover:text-brand transition-colors">
-                        {proj.name}
+                      <h4 className="font-display font-bold text-sm sm:text-base text-text leading-none group-hover:text-brand transition-colors flex items-center gap-1.5">
+                        <span className="text-text-3 font-mono text-xs font-semibold">#{idx + 1}</span>
+                        <span>{proj.name}</span>
                       </h4>
                       <a
                         href={proj.website.startsWith('http') ? proj.website : `https://${proj.website}`}

@@ -95,8 +95,10 @@ function ensureLocalDb() {
 
 if (databaseUrl) {
   try {
+    // Strip sslmode=require to prevent it from overriding ssl.rejectUnauthorized in pg driver
+    const cleanConnectionString = databaseUrl.replace(/[?&]sslmode=require/g, '');
     pool = new Pool({
-      connectionString: databaseUrl,
+      connectionString: cleanConnectionString,
       ssl: {
         rejectUnauthorized: false // Required for Neon / Vercel Postgres connection
       },

@@ -41,11 +41,11 @@ import {
 // Model Constants
 // ──────────────────────────────────────────
 const ARTICLE_MODELS = [
+  { id: 'openai/gpt-5.5', name: 'OpenAI GPT-5.5', cost: '$5.00 / $15.00' },
   { id: 'google/gemini-3.5-flash:online', name: 'Gemini 3.5 Flash Online', cost: '$0.075 / $0.30' },
   { id: 'deepseek/deepseek-v4-pro', name: 'DeepSeek V4 Pro', cost: '$0.435 / $0.87' },
   { id: 'deepseek/deepseek-v4-flash', name: 'DeepSeek V4 Flash', cost: '$0.10 / $0.20' },
   { id: 'tencent/hunyuan-3-preview', name: 'Tencent Hunyuan 3 Preview', cost: '$0.50 / $1.00' },
-  { id: 'openai/gpt-5.5', name: 'OpenAI GPT-5.5', cost: '$5.00 / $15.00' },
   { id: 'openai/gpt-5.4', name: 'OpenAI GPT-5.4', cost: '$2.50 / $7.50' },
   { id: 'openai/gpt-5-mini', name: 'OpenAI GPT-5 Mini', cost: '$0.15 / $0.60' },
   { id: 'anthropic/claude-opus-4.6', name: 'Claude Opus 4.6', cost: '$15.00 / $75.00' },
@@ -54,6 +54,7 @@ const ARTICLE_MODELS = [
 ];
 
 const IMAGE_MODELS = [
+  { id: 'openai/gpt-5.4-image-2', name: 'OpenAI GPT-5.4 Image 2', note: 'Model tạo ảnh mặc định' },
   { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash', note: 'Nhanh, rẻ, ảnh tốt' },
   { id: 'google/gemini-2.5-pro', name: 'Gemini 2.5 Pro', note: 'Chất lượng cao hơn' },
   { id: 'openai/gpt-image-1', name: 'GPT Image 1', note: 'DALL-E chất lượng cao' },

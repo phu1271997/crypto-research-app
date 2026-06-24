@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { Database, Cpu, Menu, X, Terminal, Sun, Moon, LogOut } from 'lucide-react';
+import { Database, Cpu, Menu, X, Terminal, Sun, Moon, LogOut, Activity } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
@@ -56,11 +56,17 @@ export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: 
       icon: Database,
     },
     {
+      name: 'MXH Scan',
+      path: '/social-scan',
+      icon: Activity,
+    },
+    {
       name: 'Social Bot',
       path: '/admin',
       icon: Terminal,
     },
   ];
+
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border bg-bg/82 backdrop-blur-md h-[62px] flex items-center">

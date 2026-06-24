@@ -75,6 +75,34 @@ export interface RecentArticle {
   created_at: Date;
 }
 
+export interface ScanReport {
+  id: string;
+  project_id: string;
+  scanned_at: Date;
+  payload: {
+    project_name: string;
+    scanned_at: string;
+    channels: {
+      platform: string;
+      url: string;
+      last_post_at: string | null;
+      post_count_7d: number;
+      follower_count: number;
+      follower_delta_7d: number | null;
+      engagement_notes: string;
+    }[];
+    activity_summary: string;
+    progress_signals: string[];
+    red_flags: string[];
+    momentum: 'accelerating' | 'steady' | 'slowing' | 'inactive';
+    overall_note: string;
+  };
+  status: string;
+  error: string | null;
+  created_at: Date;
+}
+
+
 const isProduction = process.env.NODE_ENV === 'production';
 const databaseUrl = process.env.DATABASE_URL;
 
@@ -188,6 +216,21 @@ async function ensureTable() {
         );
       `);
       await client.query('CREATE INDEX IF NOT EXISTS idx_draft_articles_status ON draft_articles(status);');
+
+      // 5. Create scan_reports table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS scan_reports (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          project_id UUID NOT NULL,
+          scanned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          payload JSONB NOT NULL,
+          status VARCHAR(20) NOT NULL DEFAULT 'done',
+          error TEXT,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+      await client.query('CREATE INDEX IF NOT EXISTS idx_scan_reports_project_id ON scan_reports(project_id);');
+
 
       // 5. Create recent_articles table
       await client.query(`
@@ -419,6 +462,8 @@ const localCommandsPath = path.join(process.cwd(), '.local_db', 'bot_commands.js
 const localStatusPath = path.join(process.cwd(), '.local_db', 'bot_status.json');
 const localDraftsPath = path.join(process.cwd(), '.local_db', 'draft_articles.json');
 const localRecentPath = path.join(process.cwd(), '.local_db', 'recent_articles.json');
+const localReportsPath = path.join(process.cwd(), '.local_db', 'scan_reports.json');
+
 
 function ensureFileExists(filePath: string, defaultContent: any) {
   const dir = path.dirname(filePath);
@@ -719,4 +764,91 @@ export async function getRecentArticles(limit = 10): Promise<RecentArticle[]> {
 
   return result.rows;
 }
+
+export async function getScanReportsByProjectId(projectId: string): Promise<ScanReport[]> {
+  await ensureTable();
+  if (useLocalDb) {
+    const reports = getLocalData<ScanReport[]>(localReportsPath, []);
+    return reports
+      .filter(r => r.project_id === projectId)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }
+
+  if (!pool) throw new Error('Database pool not initialized');
+  const result = await pool.query(`
+    SELECT id, project_id, scanned_at, payload, status, error, created_at
+    FROM scan_reports
+    WHERE project_id = $1
+    ORDER BY created_at DESC
+  `, [projectId]);
+
+  return result.rows.map(row => ({
+    ...row,
+    payload: typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload
+  }));
+}
+
+export async function getLatestScanReportForEachProject(): Promise<Record<string, ScanReport>> {
+  await ensureTable();
+  if (useLocalDb) {
+    const reports = getLocalData<ScanReport[]>(localReportsPath, []);
+    const latestMap: Record<string, ScanReport> = {};
+    const sorted = [...reports].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    for (const r of sorted) {
+      latestMap[r.project_id] = r;
+    }
+    return latestMap;
+  }
+
+  if (!pool) throw new Error('Database pool not initialized');
+  const result = await pool.query(`
+    SELECT DISTINCT ON (project_id) id, project_id, scanned_at, payload, status, error, created_at
+    FROM scan_reports
+    ORDER BY project_id, created_at DESC
+  `);
+
+  const latestMap: Record<string, ScanReport> = {};
+  for (const row of result.rows) {
+    latestMap[row.project_id] = {
+      ...row,
+      payload: typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload
+    };
+  }
+  return latestMap;
+}
+
+export async function createScanReport(report: Omit<ScanReport, 'id' | 'created_at'>): Promise<ScanReport> {
+  await ensureTable();
+  const newReport: ScanReport = {
+    ...report,
+    id: crypto.randomUUID(),
+    created_at: new Date()
+  };
+
+  if (useLocalDb) {
+    const reports = getLocalData<ScanReport[]>(localReportsPath, []);
+    reports.push(newReport);
+    saveLocalData(localReportsPath, reports);
+    return newReport;
+  }
+
+  if (!pool) throw new Error('Database pool not initialized');
+  const result = await pool.query(`
+    INSERT INTO scan_reports (id, project_id, scanned_at, payload, status, error, created_at)
+    VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
+    RETURNING id, created_at;
+  `, [
+    newReport.id,
+    newReport.project_id,
+    newReport.scanned_at,
+    JSON.stringify(newReport.payload),
+    newReport.status,
+    newReport.error
+  ]);
+
+  newReport.id = result.rows[0].id;
+  newReport.created_at = result.rows[0].created_at;
+  return newReport;
+}
+
 

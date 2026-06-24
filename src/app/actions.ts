@@ -8,7 +8,11 @@ import {
   deleteProject, 
   Project,
   createBotCommand,
-  getBotCommandById
+  getBotCommandById,
+  getScanReportsByProjectId,
+  getLatestScanReportForEachProject,
+  ScanReport,
+  BotCommand
 } from '@/lib/db';
 import { scrapeWebsite } from '@/lib/scraper';
 import { researchAndScoreProject, cleanAndNormalizeProjectScores, LLMResponse } from '@/lib/openrouter';
@@ -168,3 +172,79 @@ export async function deleteProjectAction(id: string): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Server Action: Fetch all social scan reports for a specific project
+ */
+export async function getScanReportsAction(projectId: string): Promise<ScanReport[]> {
+  try {
+    return await getScanReportsByProjectId(projectId);
+  } catch (error) {
+    console.error(`Error fetching scan reports for project ${projectId}:`, error);
+    return [];
+  }
+}
+
+/**
+ * Server Action: Fetch the latest scan report for each project in the database
+ */
+export async function getLatestScanReportsAction(): Promise<Record<string, ScanReport>> {
+  try {
+    return await getLatestScanReportForEachProject();
+  } catch (error) {
+    console.error('Error fetching latest scan reports:', error);
+    return {};
+  }
+}
+
+/**
+ * Server Action: Dispatch a SOCIAL_SCAN command to the VPS Bot
+ */
+export async function dispatchSocialScanAction(projectIds: string[]): Promise<ActionResult<BotCommand>> {
+  if (!projectIds || projectIds.length === 0) {
+    return { success: false, error: 'Danh sách dự án để quét là bắt buộc.' };
+  }
+
+  try {
+    const projectsToScan = [];
+    for (const id of projectIds) {
+      const p = await getProjectById(id);
+      if (p) {
+        projectsToScan.push({
+          id: p.id,
+          name: p.name,
+          website: p.website
+        });
+      }
+    }
+
+    if (projectsToScan.length === 0) {
+      return { success: false, error: 'Không tìm thấy dự án hợp lệ nào để quét.' };
+    }
+
+    console.log(`Dispatching SOCIAL_SCAN command for ${projectsToScan.length} projects...`);
+    const command = await createBotCommand('SOCIAL_SCAN', {
+      projects: projectsToScan
+    });
+
+    revalidatePath('/social-scan');
+    return { success: true, data: command };
+  } catch (error: any) {
+    console.error('Error dispatching social scan command:', error);
+    return { success: false, error: error.message || 'Thất bại khi gửi lệnh quét mạng xã hội.' };
+  }
+}
+
+/**
+ * Server Action: Fetch the status of a specific bot command by ID
+ */
+export async function getBotCommandStatusAction(id: number): Promise<BotCommand | null> {
+  try {
+    return await getBotCommandById(id);
+  } catch (error) {
+    console.error(`Error fetching command status for id ${id}:`, error);
+    return null;
+  }
+}
+
+

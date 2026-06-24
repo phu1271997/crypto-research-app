@@ -1,0 +1,40 @@
+schedule:
+  trending_cron: "0 9 * * *"
+  timezone: "Asia/Ho_Chi_Minh"
+
+article:
+  language: "vi"
+  target_words: 2100
+  tone: "professional, analytical, research-grade, neutral"
+  sections:
+    - "Tóm tắt"
+    - "Bối cảnh"
+    - "Phân tích"
+    - "Tác động thị trường"
+    - "Rủi ro và biến số cần theo dõi"
+    - "Kết luận"
+
+twitter:
+  language: "en"
+  thread_min_tweets: 3
+  thread_max_tweets: 4
+  tweet_max_chars: 1500
+
+image:
+  thumbnail_size: "1200x630"
+  inline_size: "1024x576"
+  style_keywords: "modern, minimal, crypto, blockchain, futuristic, professional, dark theme with neon accents"
+
+trending:
+  num_topics: 9
+  lookback_hours: 48
+  rss_feeds:
+    - "https://coin68.com/rss/trang-chu.rss"
+    - "https://coin68.com/rss/tin-moi-nhat.rss"
+    - "https://coin68.com/rss/tin-noi-bat.rss"
+    - "https://www.theblock.co/rss.xml"
+    - "https://decrypt.co/feed"
+    - "https://cointelegraph.com/rss"
+
+db:
+  recent_articles_keep: 3

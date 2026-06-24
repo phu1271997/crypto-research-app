@@ -1,151 +1,146 @@
 # Primus Research AI & Bot Integration - Session Handoff Context
-This document serves as the complete state representation of the development session for **Primus Research AI** and its integration with the **Dang-bai-X-bot** publisher bot. If you are a new AI agent resuming work, reading this file will provide you with the exact context, credentials, codebase modifications, database states, and next steps.
+
+Tài liệu này lưu trữ toàn bộ trạng thái kiến trúc, hạ tầng, cơ sở dữ liệu, các tệp nguồn và chi tiết kỹ thuật mới nhất của dự án **Primus Research AI** tính đến ngày **24/06/2026**. Bất kỳ hệ thống AI hay lập trình viên nào tiếp quản tài liệu này đều có thể hiểu ngay lập tức mô hình dự án và tiếp tục phát triển mà không gặp trở ngại.
 
 ---
 
-## 1. Executive Summary & Current Status
-We have successfully integrated the Next.js Vercel Web Dashboard with the VPS-hosted Python Bot via a **DB-as-command-queue** architecture.
+## 1. TỔNG QUAN KIẾN TRÚC HỆ THỐNG (SYSTEM ARCHITECTURE)
 
-- **Frontend App URL**: [https://crypto-research-app.vercel.app/admin](https://crypto-research-app.vercel.app/admin)
-- **Local Workspace**: `/Users/peter/AI/AI-research`
-- **Main Goal**: Control the Python publisher bot directly from the Web Admin dashboard using outbound-only polling from the VPS to protect internal systems.
-- **Current State**: All integration code is written, compiled, and deployed. The dashboard supports dark/light mode, trending topic rendering (9 items in a custom grid), customizable publishing targets (Primus Spark / AZDAG), publishing format triggers (Thread vs X Article), long tweet limits (4000 chars), and self-healing worker loops.
+Hệ thống hoạt động theo mô hình **DB-as-command-queue** (hàng đợi lệnh thông qua cơ sở dữ liệu) với cơ chế **outbound-only polling** (quét một chiều chủ động từ VPS ra ngoài) nhằm tối ưu hóa bảo mật cho server:
 
----
+```mermaid
+graph TD
+    subgraph Client & Frontend (Next.js on Vercel)
+        A[Dashboard /research] -->|1. Yêu cầu Research/Scan| B(Server Actions /actions.ts)
+        E[Dashboard /social-scan] -->|1. Yêu cầu Research/Scan| B
+        C[Database / Neon PostgreSQL] <-->|2. Lưu trữ lệnh & Đọc kết quả| B
+    end
 
-## 2. Infrastructure & Credentials
-
-### VPS Connection (Host for Python Bot)
-- **IP Address**: `36.50.55.21`
-- **User**: `root`
-- **Port**: `22`
-- **Working Directory**: `/opt/Dang-bai-X-bot`
-- **Python Virtualenv**: `/opt/Dang-bai-X-bot/venv/bin/python`
-- **PM2 Process Name**: `Dang-bai-X-bot` (PM2 ID: `11`)
-- **App Log File**: `/opt/Dang-bai-X-bot/logs/bot.log`
-
-### Database Engine (Neon PostgreSQL)
-- Connected to a serverless Postgres instance on Neon.
-- **Critical PgBouncer Fix**: Direct Neon connection poolers crash on driver prepared statements. The SQLAlchemy connection engine on the VPS is configured with `connect_args={"prepare_threshold": None}` for `psycopg3` compatibility.
-- **Web App Config**: If `DATABASE_URL` is missing in the environment, the Next.js app falls back to local JSON databases stored in `.local_db/`.
-
----
-
-## 3. Database Schema Overview
-Communication is coordinated through 5 main database tables:
-
-1. **`projects`**: Watchlist for evaluated crypto venture projects (100-point scale).
-2. **`bot_commands`**: Commands sent from Web Admin to VPS Bot.
-   - Fields: `id` (Auto-increment), `type` (`GENERATE`, `PUBLISH`, `REGENERATE_THREAD`, `REGENERATE_IMAGES`, `REGENERATE_ALL`, `CANCEL`, `TRENDING`), `payload` (JSON), `status` (`pending`, `processing`, `done`, `failed`), `error` (Text), `created_at`, `updated_at`.
-3. **`bot_status`**: Online heartbeat & configuration reporting.
-   - Fields: `id` (1), `last_seen` (timestamp), `uptime` (seconds), `status` (`idle`, `working`), `config` (JSON storing active model names and the parsed `trending_topics` list).
-4. **`draft_articles`**: Articles written by AI waiting for human review.
-   - Fields: `id` (UUID), `topic` (Text), `status` (`draft`, `editing`, `approved`, `publishing`, `published`, `failed`), `version` (Integer - used for Optimistic Locking), `payload` (JSON containing title, content, tweets, images, and meta configurations), `error`, `created_at`, `updated_at`.
-5. **`recent_articles`**: History of successfully published articles.
-   - Fields: `id` (Auto-increment), `title`, `slug`, `primus_url`, `azdag_url`, `x1_url` (Primus X link), `x2_url` (AZDAG X link), `created_at`.
-
----
-
-## 4. Key Implementations in this Session
-
-### 1. Advanced Web Admin Options (`src/app/admin/page.tsx`)
-- **Target Platform Selection**: Toggle publication between **Primus Spark** and **AZDAG**.
-- **Publish Mode Selection**: Choose to publish to **Both (Web & X)**, **Web Only**, or **X Only**.
-- **X Format Selection**: Select between **Twitter Thread** and **X Article (Long Form)**.
-- **Tick Xanh Support**: Extended the Tweet card edit text limit to **4000 characters** (from 280) to support long tweets on verified accounts.
-- These configs are saved inside the `payload.meta` block of the `DraftArticle` and fetched on draft edit selection.
-
-### 2. Suggested Topics & Manual Trending (`src/app/admin/page.tsx` & `/opt/Dang-bai-X-bot/src/scheduler.py`)
-- **9-Topic Grid Layout**: The Suggested Topics layout was restructured into a large, easy-to-read responsive Grid panel instead of a small box, showing topic names, RSS sources, and reasons.
-- The `config.yaml` on the VPS was updated to request exactly `num_topics: 9`.
-- **"Quét Tin Hot" Button**: Dispatches a `TRENDING` command instantly to trigger RSS scanning without waiting for the cron schedule.
-
-### 3. Client-Side Theme Switcher (`src/app/components/Navbar.tsx`)
-- Added a Sun/Moon icon toggle to switch between **Dark** and **Light** themes.
-- Preference is cached in browser `localStorage`.
-- Added CSS variables and overrides in [src/app/globals.css](file:///Users/peter/AI/AI-research/src/app/globals.css) to support clean background colors, inputs, cards, and text in light mode. Escaped Tailwind v4 special characters to avoid build compiler warnings.
-
-### 4. VPS Bot Resiliency & Heartbeat Fixes (`/opt/Dang-bai-X-bot/src/worker.py`)
-- **Self-Healing Startup**: On start, the bot scans `bot_commands` and automatically resets stuck `processing` commands (left over from crashes or sudden restarts) to `failed` so the worker doesn't get blocked.
-- **Heartbeat Config Preservation**: The heartbeat loop updates uptime and settings using python dictionary `.update()` instead of complete overwrites, preventing the deletion of the `trending_topics` list generated by the scraper/scheduler.
-
----
-
-## 5. Codebase File Map
-
-### Web App Files (Next.js)
-- [src/lib/db.ts](file:///Users/peter/AI/AI-research/src/lib/db.ts): Main database connector mapping queries for both Postgres and JSON file fallbacks.
-- [src/app/actions/admin.ts](file:///Users/peter/AI/AI-research/src/app/actions/admin.ts): Server Actions exposing bot management and draft updates to the frontend.
-- [src/app/admin/page.tsx](file:///Users/peter/AI/AI-research/src/app/admin/page.tsx): Cyberpunk control panel UI. Handles live polling, Suggested Topics grid, generated outputs editing, and platform selectors.
-- [src/app/components/Navbar.tsx](file:///Users/peter/AI/AI-research/src/app/components/Navbar.tsx): Nav menu featuring client-side light/dark theme switch.
-- [src/app/globals.css](file:///Users/peter/AI/AI-research/src/app/globals.css): Custom CSS variables, scrollbars, and light mode styling.
-
-### VPS Python Bot Files
-*Note: Local backup scratch files of these scripts are stored in the active brain workspace directory.*
-- `/opt/Dang-bai-X-bot/src/db.py`: SQLAlchemy setup & engine creation. Local copy: [vps_db.py](file:///Users/peter/.gemini/antigravity/brain/0c37f27e-ddea-436e-b742-eb562096b0f0/scratch/vps_db.py)
-- `/opt/Dang-bai-X-bot/src/worker.py`: Async task loop polling database commands and writing heartbeats. Local copy: [vps_worker.py](file:///Users/peter/.gemini/antigravity/brain/0c37f27e-ddea-436e-b742-eb562096b0f0/scratch/vps_worker.py)
-- `/opt/Dang-bai-X-bot/src/scheduler.py`: Cron triggers for trending RSS updates. Local copy: [vps_scheduler.py](file:///Users/peter/.gemini/antigravity/brain/0c37f27e-ddea-436e-b742-eb562096b0f0/scratch/vps_scheduler.py)
-- `/opt/Dang-bai-X-bot/main.py`: Main entrypoint orchestrating worker and heartbeat threads. Local copy: [vps_main.py](file:///Users/peter/.gemini/antigravity/brain/0c37f27e-ddea-436e-b742-eb562096b0f0/scratch/vps_main.py)
-- `/opt/Dang-bai-X-bot/config.yaml`: Configuration settings specifying trending limits (`num_topics: 9`).
-
----
-
-## 6. Verification Status & Build Integrity
-
-### 1. Next.js Build Check
-The TypeScript compilation and production packaging built flawlessly:
-```bash
-npm run build
+    subgraph Backend & Publisher (Python Bot on VPS)
+        D[Bốp-Worker / bop_worker.py] <-->|3. Quét lệnh pending & trả kết quả| C
+        F[Dang-bai-X-bot / main.py] <-->|3. Quét lệnh pending & trả kết quả| C
+        G[Hermes CLI / Agent Bốp] <-->|4. Thực thi quét/phân tích sâu| D
+    end
 ```
-- **Output**: Built `/`, `/admin`, `/list`, `/project/[id]` routes successfully. Zero typescript errors.
 
-### 2. VPS Code Compilations
-All modified Python files compile without syntax or import errors inside the virtualenv:
-```bash
-/opt/Dang-bai-X-bot/venv/bin/python -m py_compile /opt/Dang-bai-X-bot/src/db.py
-/opt/Dang-bai-X-bot/venv/bin/python -m py_compile /opt/Dang-bai-X-bot/src/worker.py
-/opt/Dang-bai-X-bot/venv/bin/python -m py_compile /opt/Dang-bai-X-bot/src/scheduler.py
-/opt/Dang-bai-X-bot/venv/bin/python -m py_compile /opt/Dang-bai-X-bot/main.py
-```
-- **Output**: 0 failures.
+### Các thành phần chính:
+1.  **Frontend (Next.js App Router)**: Giao diện quản trị viên Cyberpunk hỗ trợ chuyển đổi giao diện Sáng/Tối, thực hiện cào web thô và giao tiếp với database qua Server Actions.
+2.  **Database Engine (Neon PostgreSQL)**: Cơ sở dữ liệu serverless trung gian. Có cơ chế tự động chuyển đổi sang database JSON cục bộ (`.local_db/`) nếu thiếu biến môi trường chạy local.
+3.  **Python Bot & AI Agents (VPS-hosted)**: Đặt tại VPS, chạy liên tục để quét bảng `bot_commands`, thực hiện nghiên cứu chuyên sâu, quét mạng xã hội (qua AI Agent Bốp bằng Hermes CLI cục bộ) và tự động viết/đăng bài viết lên WordPress/X.
 
 ---
 
-## 7. VPS Operation Commands
+## 2. THÔNG TIN HẠ TẦNG & THÔNG TIN ĐĂNG NHẬP (INFRASTRUCTURE & CREDENTIALS)
 
-Use the following SSH commands when maintaining the bot process on the VPS (`36.50.55.21`):
+### VPS (Máy chủ lưu trữ Bot & AI Agent)
+*   **IP Address**: `36.50.55.21` (Port: `22`, User: `root`)
+*   **Thư mục làm việc**: `/opt/Dang-bai-X-bot`
+*   **Python Virtualenv**: `/opt/Dang-bai-X-bot/venv/bin/python`
+*   **Hệ điều hành**: Ubuntu 22.04 LTS
+*   **Các tiến trình PM2 đang hoạt động**:
+    *   `Dang-bai-X-bot` (ID: `3`): Chạy file `main.py` để xử lý việc viết bài và xuất bản lên WordPress/X.
+    *   `Bốp-Worker` (ID: `7`): Chạy file `src/bop_worker.py` để xử lý các lệnh `RESEARCH` và `SOCIAL_SCAN` qua Hermes CLI.
+    *   `Bốp-Hermes` (ID: `2`): Chạy tác vụ bổ trợ của Agent Bốp.
+    *   `hermes-gateway` (ID: `6`): Cổng giao tiếp nội bộ cho Hermes Agent.
 
-- **Check Process List**: `pm2 list` (Confirm process 11 `Dang-bai-X-bot` is online).
-- **Restart Bot (Apply Env/Config changes)**: `pm2 restart Dang-bai-X-bot --update-env`
-- **View Live Logs**: `pm2 logs Dang-bai-X-bot`
-- **Check Bot logs via File**: `tail -n 100 /opt/Dang-bai-X-bot/logs/bot.log`
+### Cơ sở dữ liệu (Neon PostgreSQL)
+*   **Kết nối**: Kết nối trực tiếp qua `DATABASE_URL`.
+*   **Lưu ý kỹ thuật quan trọng**: Nhằm tránh lỗi driver PostgreSQL crash khi chạy các truy vấn chuẩn hóa (prepared statements) qua cổng kết nối Pool của Neon PgBouncer, các kết nối trên VPS và Frontend đều được cấu hình tham số `connect_args={"prepare_threshold": None}` (Python) hoặc tự động loại bỏ các lệnh prepared cache.
 
 ---
 
-## 8. Hand-off Action Items (Next Steps)
-To completely verify the pipeline in the next session, perform the following validation steps:
+## 3. THIẾT KẾ CƠ SỞ DỮ LIỆU (DATABASE SCHEMA)
 
-1. **Verify Connection Heartbeat**:
-   - Access the dashboard at [https://crypto-research-app.vercel.app/admin](https://crypto-research-app.vercel.app/admin).
-   - Ensure the Status Panel displays `Đang hoạt động (Online)` with a ticking heartbeat.
+Cơ chế điều khiển và chia sẻ trạng thái giữa Web App và VPS Bot được cấu trúc qua 6 bảng chính trong cơ sở dữ liệu:
 
-2. **Trigger manual RSS Scan**:
-   - Click the **Quét Tin Hot (Trending)** button.
-   - Verify that a `TRENDING` command enters the queue list, transitions to `processing`, and changes to `done`.
-   - Refresh the page and confirm that 9 Suggested Topics are populated in the grid.
+1.  **`projects`**: Danh sách dự án đã được nghiên cứu và chấm điểm.
+    *   *Trường dữ liệu*: `id` (UUID), `name`, `website`, `total_score` (điểm tổng 100), `recommendation` (Khuyến nghị đầu tư), `scores` (JSON chứa điểm 8 hạng mục kèm lý do và mức tin cậy), `summary`, `detailed_assessment` (bản đánh giá chi tiết kiểu memo nội bộ IC), `strengths`, `risks`, `red_flags`, `questions_for_founder`, `raw_input`, `auto_scan` (BOOLEAN - tự động scan định kỳ), `created_at`.
+2.  **`bot_commands`**: Hàng đợi các lệnh gửi từ giao diện Web đến VPS Bot.
+    *   *Trường dữ liệu*: `id` (SERIAL), `type` (`GENERATE`, `PUBLISH`, `REGENERATE_THREAD`, `REGENERATE_IMAGES`, `REGENERATE_ALL`, `CANCEL`, `TRENDING`, `RESEARCH`, `SOCIAL_SCAN`), `payload` (JSON), `status` (`pending`, `processing`, `done`, `failed`), `error` (TEXT), `created_at`, `updated_at`.
+3.  **`bot_status`**: Lưu trữ trạng thái online (heartbeat), uptime và cấu hình gợi ý tin tức nóng (`trending_topics`) của VPS Bot.
+4.  **`draft_articles`**: Các bản thảo bài viết do AI viết đang chờ quản trị viên duyệt để đăng.
+5.  **`recent_articles`**: Nhật ký liên kết các bài viết đã xuất bản thành công lên WordPress và mạng xã hội X.
+6.  **`scan_reports` (Bảng mới tạo)**: Lưu trữ lịch sử các báo cáo quét (scan) mạng xã hội của dự án.
+    *   *Trường dữ liệu*: `id` (UUID), `project_id` (UUID), `scanned_at` (TIMESTAMP), `payload` (JSON chứa chi tiết các kênh Twitter/Telegram/Discord/GitHub, tóm tắt hoạt động, các tín hiệu tích cực, Red Flags và chỉ số Momentum), `status`, `error`, `created_at`.
 
-3. **Generate a Draft Article**:
-   - Click on any of the 9 Suggested Topics in the grid. This action auto-populates the input box at the bottom.
-   - Click **Gửi Lệnh GENERATE**.
-   - Monitor the command list. Once completed, a new article draft will appear on the left draft panel.
+---
 
-4. **Verify Platform & Format Options**:
-   - Select the newly generated draft.
-   - Edit the Markdown body or Tweet Thread details.
-   - Switch target platform configurations (e.g., set to **AZDAG**, select **Chỉ X (X Only)**, set format to **X Article**).
-   - Confirm that saving edits persists these configurations.
+## 4. CHI TIẾT CÁC TÍNH NĂNG CỐT LÕI ĐÃ TÍCH HỢP
 
-5. **Publish to WordPress / X**:
-   - Click **Duyệt & Đăng bài**.
-   - The status should change to `publishing` then `published`.
-   - Check the **Nhật ký phát hành gần đây** panel to verify WordPress URLs and Tweet links.
+### 4.1. Tích hợp AI Agent Bốp vào "Research Dự Án"
+*   **Vị trí giao diện**: Trang `/research` (Mặc định chọn Bốp).
+*   **Luồng hoạt động**:
+    1.  Người dùng nhập URL dự án và bấm **Phân tích**. Giao diện hiển thị các bước chờ trực quan.
+    2.  Next.js gọi Server Action cào nội dung website thô thông qua `scrapeWebsite`.
+    3.  Hệ thống tạo lệnh `RESEARCH` mới trong bảng `bot_commands`.
+    4.  Tiến trình `Bốp-Worker` trên VPS nhận lệnh, truyền dữ liệu cào vào **Hermes CLI** (`/root/.hermes/hermes-agent/venv/bin/hermes`) để phân tích sâu bằng Agent Bốp.
+    5.  Agent Bốp trả về kết quả JSON chuẩn hóa. Worker trên VPS lưu kết quả vào trường `payload.result` của lệnh và đánh dấu `done`.
+    6.  Frontend Next.js liên tục quét (poll) database mỗi 3 giây. Khi hoàn tất, nó sẽ lấy kết quả JSON, đi qua bộ chuẩn hóa `cleanAndNormalizeProjectScores` (tái chuẩn hóa điểm tổng về thang 100 nếu thiếu Tokenomics hoặc Deal terms) và lưu vào bảng `projects`.
+
+### 4.2. Tính năng lớn: "Scan" (Quét xung lực mạng xã hội)
+*   **Vị trí giao diện**: Trang `/social-scan` (Tab **Scan** trên Navbar).
+*   **Luồng hoạt động**:
+    1.  Trang hiển thị toàn bộ dự án đang có trong **Watchlist** ở cột bên trái kèm bộ lọc tìm kiếm.
+    2.  Người dùng có thể chọn một hoặc nhiều dự án và bấm **Khởi Chạy Scan**.
+    3.  Hệ thống tạo lệnh `SOCIAL_SCAN` trong bảng `bot_commands` kèm danh sách dự án cần quét.
+    4.  `Bốp-Worker` tiếp nhận, quét các kênh mạng xã hội (Twitter/X, Telegram, Discord, GitHub) của từng dự án trong 7 ngày qua thông qua Agent Bốp.
+    5.  Báo cáo chi tiết dạng JSON được ghi trực tiếp vào bảng `scan_reports`.
+    6.  Giao diện Web hiển thị báo cáo cực kỳ trực quan ở cột bên phải:
+        *   *Momentum*: Nhãn trạng thái màu sắc (*Bứt Phá*, *Ổn Định*, *Chậm Lại*, *Tạm Ngưng*).
+        *   *Thông số các kênh*: Grid card chi tiết cho từng platform hiển thị lượng followers, post count, delta tăng trưởng tuần và nhận xét tương tác.
+        *   *Tín hiệu tích cực & Red Flags*: Danh sách điểm sáng và cảnh báo nguy hiểm trực quan.
+        *   *Lịch sử*: Hỗ trợ xem lại toàn bộ các báo cáo cũ theo ngày tháng.
+
+### 4.3. Vô hiệu hóa Cron tự động quét tin hot (Trending Job)
+*   **Chỉnh sửa**: Tắt cron job tự động `trending_job` định kỳ trong tệp [scheduler.py](file:///Users/peter/Downloads/AI/primus-research/vps/Dang-bai-X-bot/src/scheduler.py) trên VPS để tối ưu hóa tài nguyên máy chủ.
+*   **Kết quả**: Tính năng lấy tin hot đổi hoàn toàn sang cơ chế kích hoạt thủ công bằng nút **"Quét Tin Hot"** trên giao diện Web Admin để người dùng kiểm soát 100% thời điểm quét.
+
+---
+
+## 5. BẢN ĐỒ MÃ NGUỒN (CODEBASE FILE MAP)
+
+### Frontend (Next.js Web App)
+*   [src/lib/db.ts](file:///Users/peter/Downloads/AI/primus-research/src/lib/db.ts): Module database chính. Quản lý kết nối, auto-migration tạo bảng `scan_reports`, định nghĩa kiểu dữ liệu `ScanReport`, và các hàm hỗ trợ lưu/truy vấn.
+*   [src/app/actions.ts](file:///Users/peter/Downloads/AI/primus-research/src/app/actions.ts): Server Actions giao tiếp trực tiếp giữa client và database, bao gồm luồng gửi lệnh `RESEARCH`, `SOCIAL_SCAN` và kiểm tra trạng thái lệnh.
+*   [src/app/components/Navbar.tsx](file:///Users/peter/Downloads/AI/primus-research/src/app/components/Navbar.tsx): Thanh điều hướng chính tích hợp tab **Scan**.
+*   [src/app/social-scan/page.tsx](file:///Users/peter/Downloads/AI/primus-research/src/app/social-scan/page.tsx): Cổng truy cập Server Component cho trang Scan.
+*   [src/app/components/SocialScanClient.tsx](file:///Users/peter/Downloads/AI/primus-research/src/app/components/SocialScanClient.tsx): Giao diện tương tác Client Component của trang Scan.
+*   [src/app/components/ResearchPageClient.tsx](file:///Users/peter/Downloads/AI/primus-research/src/app/components/ResearchPageClient.tsx): Giao diện trang Research tích hợp lựa chọn Agent Bốp làm mặc định.
+*   [src/context/ResearchContext.tsx](file:///Users/peter/Downloads/AI/primus-research/src/context/ResearchContext.tsx): Context quản lý trạng thái nghiên cứu toàn cục của ứng dụng.
+
+### Backend (VPS Python Bot - `/opt/Dang-bai-X-bot`)
+*   `main.py`: Khởi chạy bot, nạp biến môi trường và chạy các luồng xử lý đồng thời.
+*   `src/bop_worker.py`: Tiến trình chạy nền quét lệnh `RESEARCH` và `SOCIAL_SCAN` từ database, thực thi thông qua Hermes CLI, trích xuất kết quả JSON và cập nhật ngược lại cơ sở dữ liệu.
+*   `src/scheduler.py`: Bộ lập lịch cron job chạy nền (Đã tắt job tự động lấy tin hot theo yêu cầu).
+*   `src/db.py`: Cấu hình kết nối PostgreSQL qua SQLAlchemy cho Bot.
+
+---
+
+## 6. HƯỚNG DẪN VẬN HÀNH VPS (VPS OPERATIONS)
+
+Khi cần bảo trì hoặc kiểm tra trạng thái bot trên VPS (`36.50.55.21`), hãy sử dụng các lệnh SSH sau:
+
+*   **Xem danh sách các tiến trình**:
+    ```bash
+    pm2 list
+    ```
+*   **Xem logs hoạt động của Bot**:
+    ```bash
+    pm2 logs Dang-bai-X-bot
+    ```
+    hoặc xem logs của Bốp Worker:
+    ```bash
+    pm2 logs Bốp-Worker
+    ```
+*   **Xem logs trực tiếp từ file**:
+    ```bash
+    tail -n 100 /opt/Dang-bai-X-bot/logs/bot.log
+    ```
+*   **Khởi động lại Bot để cập nhật cấu hình**:
+    ```bash
+    pm2 restart Dang-bai-X-bot
+    ```
+*   **Kiểm tra tính biên dịch không lỗi của mã nguồn Python**:
+    ```bash
+    /opt/Dang-bai-X-bot/venv/bin/python -m py_compile /opt/Dang-bai-X-bot/src/scheduler.py
+    ```

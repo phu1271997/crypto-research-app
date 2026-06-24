@@ -74,8 +74,8 @@ export interface ModelInfo {
 }
 
 export const OPENROUTER_MODELS: ModelInfo[] = [
-  { id: 'google/gemini-3-flash-preview:online', name: 'Gemini 3.5 Flash Online (Mặc định)', inputPrice: '0.075', outputPrice: '0.30' },
-  { id: 'deepseek/deepseek-v4-pro', name: 'DeepSeek V4 Pro', inputPrice: '0.435', outputPrice: '0.87' },
+  { id: 'google/gemini-3-flash-preview:online', name: 'Gemini 3.5 Flash Online', inputPrice: '0.075', outputPrice: '0.30' },
+  { id: 'deepseek/deepseek-v4-pro', name: 'DeepSeek V4 Pro (Mặc định)', inputPrice: '0.435', outputPrice: '0.87' },
   { id: 'deepseek/deepseek-v4-flash', name: 'DeepSeek V4 Flash', inputPrice: '0.10', outputPrice: '0.20' },
   { id: 'tencent/hy3-preview', name: 'Tencent Hunyuan 3 Preview', inputPrice: '0.50', outputPrice: '1.00' },
   { id: 'openai/gpt-5.5', name: 'OpenAI GPT-5.5', inputPrice: '5.00', outputPrice: '15.00' },
@@ -93,7 +93,7 @@ export async function researchAndScoreProject(
   selectedModel?: string
 ): Promise<LLMResponse> {
   const apiKey = process.env.OPENROUTER_API_KEY || process.env.Openrouter || process.env.OPENROUTER;
-  const model = selectedModel || process.env.OPENROUTER_MODEL || 'google/gemini-3-flash-preview:online';
+  const model = selectedModel || process.env.OPENROUTER_MODEL || 'deepseek/deepseek-v4-pro';
 
   if (!apiKey) {
     throw new Error('OPENROUTER_API_KEY is not configured in the environment variables.');

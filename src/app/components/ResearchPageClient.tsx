@@ -10,7 +10,7 @@ import { useResearch } from '@/context/ResearchContext';
 export default function ResearchPageClient() {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [rawInput, setRawInput] = useState('');
-  const [selectedModel, setSelectedModel] = useState('google/gemini-3-flash-preview:online');
+  const [selectedModel, setSelectedModel] = useState('deepseek/deepseek-v4-pro');
 
   const {
     isResearching,

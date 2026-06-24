@@ -32,7 +32,7 @@ export function useResearch() {
 export function ResearchProvider({ children }: { children: React.ReactNode }) {
   const [isResearching, setIsResearching] = useState(false);
   const [researchUrl, setResearchUrl] = useState('');
-  const [researchModel, setResearchModel] = useState('deepseek/deepseek-v4-pro');
+  const [researchModel, setResearchModel] = useState('bop');
   const [researchResult, setResearchResult] = useState<Project | null>(null);
   const [researchError, setResearchError] = useState<string | null>(null);
   const [savedSuccess, setSavedSuccess] = useState(false);

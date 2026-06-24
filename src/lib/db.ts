@@ -31,7 +31,7 @@ export interface Project {
 
 export interface BotCommand {
   id: number;
-  type: 'GENERATE' | 'PUBLISH' | 'REGENERATE_THREAD' | 'REGENERATE_IMAGES' | 'REGENERATE_ALL' | 'CANCEL' | 'TRENDING' | 'UPDATE_CONFIG';
+  type: 'GENERATE' | 'PUBLISH' | 'REGENERATE_THREAD' | 'REGENERATE_IMAGES' | 'REGENERATE_ALL' | 'CANCEL' | 'TRENDING' | 'UPDATE_CONFIG' | 'RESEARCH' | 'SOCIAL_SCAN';
   payload: any;
   status: 'pending' | 'processing' | 'done' | 'failed';
   error: string | null;
@@ -481,6 +481,29 @@ export async function createBotCommand(type: BotCommand['type'], payload: any): 
   newCommand.updated_at = result.rows[0].updated_at;
   return newCommand;
 }
+
+export async function getBotCommandById(id: number): Promise<BotCommand | null> {
+  await ensureTable();
+  if (useLocalDb) {
+    const commands = getLocalData<BotCommand[]>(localCommandsPath, []);
+    return commands.find(c => c.id === id) || null;
+  }
+
+  if (!pool) throw new Error('Database pool not initialized');
+  const result = await pool.query(`
+    SELECT id, type, payload, status, error, created_at, updated_at
+    FROM bot_commands
+    WHERE id = $1
+  `, [id]);
+
+  if (result.rows.length === 0) return null;
+  const row = result.rows[0];
+  return {
+    ...row,
+    payload: typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload
+  };
+}
+
 
 export async function getBotCommands(limit = 20): Promise<BotCommand[]> {
   await ensureTable();

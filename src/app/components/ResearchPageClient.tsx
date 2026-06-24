@@ -10,7 +10,7 @@ import { useResearch } from '@/context/ResearchContext';
 export default function ResearchPageClient() {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [rawInput, setRawInput] = useState('');
-  const [selectedModel, setSelectedModel] = useState('deepseek/deepseek-v4-pro');
+  const [selectedModel, setSelectedModel] = useState('bop');
 
   const {
     isResearching,
@@ -23,7 +23,7 @@ export default function ResearchPageClient() {
   } = useResearch();
 
   // Resolve active model name for dynamic loading display
-  const activeModelName = OPENROUTER_MODELS.find(m => m.id === selectedModel)?.name.split(' (')[0].split(' —')[0] || 'AI';
+  const activeModelName = selectedModel === 'bop' ? 'Bốp (Hermes Agent)' : (OPENROUTER_MODELS.find(m => m.id === selectedModel)?.name.split(' (')[0].split(' —')[0] || 'AI');
 
   // Stepper messages for loading state
   const loadingSteps = [
@@ -210,6 +210,9 @@ export default function ResearchPageClient() {
                   onChange={(e) => setSelectedModel(e.target.value)}
                   className="block w-full rounded-xl border border-border bg-surface-2 py-3.5 px-4 text-sm text-text font-mono focus:border-brand focus:bg-surface focus:outline-none transition-all appearance-none cursor-pointer"
                 >
+                  <option value="bop" className="bg-[#111a2e] text-brand text-xs sm:text-sm font-semibold">
+                    🤖 Bốp (Hermes AI Agent) — Quét &amp; Research sâu qua VPS
+                  </option>
                   {OPENROUTER_MODELS.map((model) => (
                     <option key={model.id} value={model.id} className="bg-[#111a2e] text-text-2 text-xs sm:text-sm">
                       {model.name} — (In: ${model.inputPrice} | Out: ${model.outputPrice} /M)

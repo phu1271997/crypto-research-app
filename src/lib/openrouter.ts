@@ -59,6 +59,81 @@ function extractJson(text: string): any {
 }
 
 /**
+ * Helper function to extract, normalize, and recalculate scores out of 100
+ */
+export function cleanAndNormalizeProjectScores(rawResult: any): LLMResponse {
+  let totalMaxPossible = 0;
+  let totalAcquired = 0;
+  
+  const scoreKeys = [
+    'teamFounders',
+    'marketTiming',
+    'productProblem',
+    'techSecurity',
+    'tractionMetrics',
+    'businessMoat',
+    'tokenomics',
+    'dealValuation'
+  ] as const;
+  
+  const maxScores: Record<typeof scoreKeys[number], number> = {
+    teamFounders: 10,
+    marketTiming: 16,
+    productProblem: 21,
+    techSecurity: 17,
+    tractionMetrics: 14,
+    businessMoat: 12,
+    tokenomics: 6,
+    dealValuation: 4
+  };
+  
+  // Ensure scores object exists
+  if (!rawResult.scores) {
+    rawResult.scores = {};
+  }
+  
+  for (const key of scoreKeys) {
+    if (rawResult.scores[key]) {
+      // Enforce maximum weight limits on server-side
+      rawResult.scores[key].max = maxScores[key];
+      
+      const rawScore = rawResult.scores[key].score;
+      if (rawScore !== null && rawScore !== undefined && String(rawScore).trim() !== 'N/A' && String(rawScore).trim() !== '') {
+        const numScore = Number(rawScore);
+        if (!isNaN(numScore)) {
+          // Cap score between 0 and maximum permitted points
+          rawResult.scores[key].score = Math.max(0, Math.min(maxScores[key], numScore));
+          totalAcquired += rawResult.scores[key].score;
+          totalMaxPossible += maxScores[key];
+        } else {
+          rawResult.scores[key].score = null;
+        }
+      } else {
+        rawResult.scores[key].score = null;
+      }
+    } else {
+      rawResult.scores[key] = { 
+        score: null, 
+        max: maxScores[key], 
+        reasoning: 'Không đủ dữ liệu đánh giá hạng mục này.', 
+        confidence: 'Thấp' 
+      };
+    }
+  }
+  
+  // Recalculate total score dynamically using the approved formula:
+  // Điểm tổng = (Tổng số điểm đạt được ở các mục có dữ liệu / Tổng số điểm tối đa của các mục có dữ liệu) * 100
+  if (totalMaxPossible > 0) {
+    rawResult.totalScore = Math.round((totalAcquired / totalMaxPossible) * 100);
+  } else {
+    rawResult.totalScore = 0;
+  }
+  
+  return rawResult as LLMResponse;
+}
+
+
+/**
  * Call OpenRouter API with Web Search activated to research and score the project
  * 
  * @param url The URL of the crypto project
@@ -277,84 +352,11 @@ Hãy sử dụng WEB SEARCH để thu thập dữ liệu mới nhất: team back
     return content;
   };
 
-  // Helper function to extract, normalize, and recalculate scores out of 100
-  const processAndNormalizeResult = (content: string): LLMResponse => {
-    const rawResult = extractJson(content);
-    
-    let totalMaxPossible = 0;
-    let totalAcquired = 0;
-    
-    const scoreKeys = [
-      'teamFounders',
-      'marketTiming',
-      'productProblem',
-      'techSecurity',
-      'tractionMetrics',
-      'businessMoat',
-      'tokenomics',
-      'dealValuation'
-    ] as const;
-    
-    const maxScores: Record<typeof scoreKeys[number], number> = {
-      teamFounders: 10,
-      marketTiming: 16,
-      productProblem: 21,
-      techSecurity: 17,
-      tractionMetrics: 14,
-      businessMoat: 12,
-      tokenomics: 6,
-      dealValuation: 4
-    };
-    
-    // Ensure scores object exists
-    if (!rawResult.scores) {
-      rawResult.scores = {};
-    }
-    
-    for (const key of scoreKeys) {
-      if (rawResult.scores[key]) {
-        // Enforce maximum weight limits on server-side
-        rawResult.scores[key].max = maxScores[key];
-        
-        const rawScore = rawResult.scores[key].score;
-        if (rawScore !== null && rawScore !== undefined && String(rawScore).trim() !== 'N/A' && String(rawScore).trim() !== '') {
-          const numScore = Number(rawScore);
-          if (!isNaN(numScore)) {
-            // Cap score between 0 and maximum permitted points
-            rawResult.scores[key].score = Math.max(0, Math.min(maxScores[key], numScore));
-            totalAcquired += rawResult.scores[key].score;
-            totalMaxPossible += maxScores[key];
-          } else {
-            rawResult.scores[key].score = null;
-          }
-        } else {
-          rawResult.scores[key].score = null;
-        }
-      } else {
-        rawResult.scores[key] = { 
-          score: null, 
-          max: maxScores[key], 
-          reasoning: 'Không đủ dữ liệu đánh giá hạng mục này.', 
-          confidence: 'Thấp' 
-        };
-      }
-    }
-    
-    // Recalculate total score dynamically using the approved formula:
-    // Điểm tổng = (Tổng số điểm đạt được ở các mục có dữ liệu / Tổng số điểm tối đa của các mục có dữ liệu) * 100
-    if (totalMaxPossible > 0) {
-      rawResult.totalScore = Math.round((totalAcquired / totalMaxPossible) * 100);
-    } else {
-      rawResult.totalScore = 0;
-    }
-    
-    return rawResult;
-  };
-
   // Try block with 1-time automated retry
   try {
     const content = await makeApiCall();
-    return processAndNormalizeResult(content);
+    const rawResult = extractJson(content);
+    return cleanAndNormalizeProjectScores(rawResult);
   } catch (firstError) {
     console.warn('First OpenRouter API attempt or JSON parsing failed. Retrying once...', firstError);
     
@@ -363,7 +365,8 @@ Hãy sử dụng WEB SEARCH để thu thập dữ liệu mới nhất: team back
     
     try {
       const content = await makeApiCall();
-      return extractJson(content);
+      const rawResult = extractJson(content);
+      return cleanAndNormalizeProjectScores(rawResult);
     } catch (secondError: any) {
       console.error('Second attempt failed. Research scoring operation aborted.', secondError);
       throw new Error(`Đã xảy ra lỗi khi kết nối với LLM Research (OpenRouter): ${secondError.message || secondError}`);

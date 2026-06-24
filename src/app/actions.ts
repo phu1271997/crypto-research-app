@@ -6,10 +6,12 @@ import {
   getAllProjects, 
   getProjectById, 
   deleteProject, 
-  Project 
+  Project,
+  createBotCommand,
+  getBotCommandById
 } from '@/lib/db';
 import { scrapeWebsite } from '@/lib/scraper';
-import { researchAndScoreProject } from '@/lib/openrouter';
+import { researchAndScoreProject, cleanAndNormalizeProjectScores, LLMResponse } from '@/lib/openrouter';
 
 /**
  * Server Action result type - avoids throwing errors which get sanitized in production
@@ -42,24 +44,70 @@ export async function analyzeProjectAction(
     console.log(`Starting server-side scraping for: ${websiteUrl}`);
     const scrapedText = await scrapeWebsite(websiteUrl);
 
-    // 2. Call LLM (OpenRouter) with Web Search capabilities to perform research & score
-    console.log(`Sending data to OpenRouter (Model: ${model || 'default'})...`);
-    const llmResult = await researchAndScoreProject(websiteUrl, scrapedText, rawInputText, model);
+    let normalizedResult: LLMResponse;
+
+    if (model === 'bop') {
+      // Bốp (Hermes Agent) Research Flow via DB command queue
+      console.log('Dispatching RESEARCH command to Bốp-Worker via database...');
+      const command = await createBotCommand('RESEARCH', {
+        url: websiteUrl,
+        scrapedText: scrapedText,
+        rawInput: rawInputText,
+        name: 'Dự án'
+      });
+
+      console.log(`RESEARCH command dispatched (ID: ${command.id}). Waiting for Bốp-Worker...`);
+      let completedCommand = null;
+      const startTime = Date.now();
+      const timeoutMs = 8 * 60 * 1000; // 8 minutes timeout
+
+      while (Date.now() - startTime < timeoutMs) {
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        const cmd = await getBotCommandById(command.id);
+        if (!cmd) {
+          throw new Error('Không tìm thấy lệnh nghiên cứu trong database.');
+        }
+        if (cmd.status === 'done') {
+          completedCommand = cmd;
+          break;
+        }
+        if (cmd.status === 'failed') {
+          throw new Error(`Bốp research thất bại: ${cmd.error || 'Lỗi không xác định'}`);
+        }
+      }
+
+      if (!completedCommand) {
+        throw new Error('Quá thời gian chờ (Timeout) phản hồi từ Bốp Agent trên VPS.');
+      }
+
+      const llmResult = completedCommand.payload.result;
+      if (!llmResult) {
+        throw new Error('Không nhận được kết quả JSON nghiên cứu từ Bốp.');
+      }
+
+      console.log('Successfully retrieved research result from Bốp-Worker. Normalizing scores...');
+      normalizedResult = cleanAndNormalizeProjectScores(llmResult);
+    } else {
+      // Normal OpenRouter Flow
+      console.log(`Sending data to OpenRouter (Model: ${model || 'default'})...`);
+      const llmResult = await researchAndScoreProject(websiteUrl, scrapedText, rawInputText, model);
+      normalizedResult = llmResult;
+    }
 
     // 3. Prepare schema and save to database
     console.log('Saving researched project to Database...');
     const savedProject = await saveProject({
-      name: llmResult.projectName || 'Dự án ẩn danh',
+      name: normalizedResult.projectName || 'Dự án ẩn danh',
       website: websiteUrl,
-      total_score: llmResult.totalScore || 0,
-      recommendation: llmResult.recommendation || 'Thiếu thông tin khuyến nghị',
-      scores: llmResult.scores,
-      summary: llmResult.summary || 'Không có tóm tắt.',
-      detailed_assessment: llmResult.detailedAssessment || 'Không có đánh giá chi tiết.',
-      strengths: llmResult.strengths || [],
-      risks: llmResult.risks || [],
-      red_flags: llmResult.redFlags || [],
-      questions_for_founder: llmResult.questionsForFounder || [],
+      total_score: normalizedResult.totalScore || 0,
+      recommendation: normalizedResult.recommendation || 'Thiếu thông tin khuyến nghị',
+      scores: normalizedResult.scores,
+      summary: normalizedResult.summary || 'Không có tóm tắt.',
+      detailed_assessment: normalizedResult.detailedAssessment || 'Không có đánh giá chi tiết.',
+      strengths: normalizedResult.strengths || [],
+      risks: normalizedResult.risks || [],
+      red_flags: normalizedResult.redFlags || [],
+      questions_for_founder: normalizedResult.questionsForFounder || [],
       raw_input: rawInputText || undefined
     });
 

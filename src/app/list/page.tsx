@@ -189,6 +189,16 @@ export default function WatchlistPage() {
           <div className="space-y-3">
             {projects.map((proj, idx) => {
               const scoreColorClass = getScoreStyles(proj.total_score);
+              
+              // Resolve name: if generic "Dự án", extract and capitalize domain name
+              const resolvedName = proj.name === 'Dự án'
+                ? (() => {
+                    const domain = proj.website.replace(/^https?:\/\/(www\.)?/i, '').split('/')[0];
+                    const part = domain.split('.')[0];
+                    return part ? part.charAt(0).toUpperCase() + part.slice(1) : domain;
+                  })()
+                : proj.name;
+
               return (
                 <div
                   key={proj.id}
@@ -196,15 +206,20 @@ export default function WatchlistPage() {
                   className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-surface border border-border hover:border-border-strong hover:bg-surface-hover transition duration-150 cursor-pointer shadow-sm"
                 >
                   {/* Project & Website Info */}
-                  <div className="flex items-center gap-3.5">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    {/* Rank index number column */}
+                    <div className="font-mono text-sm sm:text-base font-bold text-text-3/40 w-6 text-center select-none shrink-0">
+                      {(idx + 1).toString().padStart(2, '0')}
+                    </div>
+
                     {/* Score box - 44px rounded square (11px radius) */}
                     <div className={`h-11 w-11 rounded-[11px] border flex items-center justify-center font-display font-extrabold text-base shrink-0 ${scoreColorClass}`}>
                       {proj.total_score}
                     </div>
-                    <div>
-                      <h4 className="font-display font-bold text-sm sm:text-base text-text leading-none group-hover:text-brand transition-colors flex items-center gap-1.5">
-                        <span className="text-text-3 font-mono text-xs font-semibold">#{idx + 1}</span>
-                        <span>{proj.name}</span>
+                    
+                    <div className="min-w-0">
+                      <h4 className="font-display font-bold text-sm sm:text-base text-text leading-none transition-colors truncate">
+                        {resolvedName}
                       </h4>
                       <a
                         href={proj.website.startsWith('http') ? proj.website : `https://${proj.website}`}
@@ -213,7 +228,7 @@ export default function WatchlistPage() {
                         onClick={(e) => e.stopPropagation()} // Stop row navigating
                         className="font-mono text-[10px] text-text-3 mt-1.5 inline-flex items-center gap-1 hover:text-brand transition-colors"
                       >
-                        <span className="truncate max-w-[150px]">{proj.website}</span>
+                        <span className="truncate max-w-[150px] sm:max-w-[250px]">{proj.website}</span>
                         <ExternalLink className="h-2.5 w-2.5 shrink-0" />
                       </a>
                     </div>

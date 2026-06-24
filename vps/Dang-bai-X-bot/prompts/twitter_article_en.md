@@ -7,7 +7,7 @@ ARTICLE:
 
 REQUIREMENTS:
 - A single cohesive long-form post (Article), NOT split into a thread.
-- Length: Around 400 words (strictly limit to between 350 and 420 words, approximately 2100 to 2500 characters).
+- Length: Around 250 words (strictly limit to between 220 and 270 words, approximately 1300 to 1600 characters).
 - Structure:
   - Strong hook/thesis in the first paragraph.
   - Core analytical arguments with specific data, mechanisms, or named projects/numbers.

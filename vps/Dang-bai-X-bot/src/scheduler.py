@@ -54,14 +54,15 @@ async def trending_job(llm_client: OpenRouterClient) -> None:
 
 def build_scheduler(llm_client: OpenRouterClient) -> AsyncIOScheduler:
     scheduler = AsyncIOScheduler(timezone=config.schedule.timezone)
-    scheduler.add_job(
-        trending_job,
-        CronTrigger.from_crontab(
-            config.schedule.trending_cron,
-            timezone=config.schedule.timezone,
-        ),
-        args=[llm_client],
-        id="trending_job",
-        misfire_grace_time=3600,
-    )
+    # Cron job disabled at user's request (will run manually via "Quét Tin Hot" button)
+    # scheduler.add_job(
+    #     trending_job,
+    #     CronTrigger.from_crontab(
+    #         config.schedule.trending_cron,
+    #         timezone=config.schedule.timezone,
+    #     ),
+    #     args=[llm_client],
+    #     id="trending_job",
+    #     misfire_grace_time=3600,
+    # )
     return scheduler

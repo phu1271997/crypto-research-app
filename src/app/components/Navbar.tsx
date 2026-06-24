@@ -56,7 +56,7 @@ export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: 
       icon: Database,
     },
     {
-      name: 'MXH Scan',
+      name: 'Scan',
       path: '/social-scan',
       icon: Activity,
     },

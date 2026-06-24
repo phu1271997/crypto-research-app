@@ -3,7 +3,7 @@ import SocialScanClient from '@/app/components/SocialScanClient';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Mạng Xã Hội Scan — Primus Research AI',
+  title: 'Scan — Primus Research AI',
   description: 'Quét và giám sát xung lực, xu hướng hoạt động mạng xã hội của các dự án tiền điện tử.',
 };
 

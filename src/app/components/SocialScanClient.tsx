@@ -121,7 +121,7 @@ export default function SocialScanClient({
     if (selectedProjectIds.size === 0) return;
     
     setIsScanning(true);
-    setScanProgress('Đang khởi tạo lệnh quét MXH và gửi lên hàng đợi...');
+    setScanProgress('Đang khởi tạo lệnh scan và gửi lên hàng đợi...');
     
     try {
       const res = await dispatchSocialScanAction(Array.from(selectedProjectIds));
@@ -155,9 +155,9 @@ export default function SocialScanClient({
           
           if (cmd.status === 'processing') {
             const projectsCount = cmd.payload?.projects?.length || 1;
-            setScanProgress(`🤖 Bốp đang quét mạng xã hội cho ${projectsCount} dự án đã chọn... (Đang chạy được ${pollCount * 3}s)`);
+            setScanProgress(`🤖 Bốp đang scan mạng xã hội cho ${projectsCount} dự án đã chọn... (Đang chạy được ${pollCount * 3}s)`);
           } else if (cmd.status === 'done') {
-            setScanProgress('🎉 Quét mạng xã hội hoàn tất! Đang tải dữ liệu mới...');
+            setScanProgress('🎉 Scan mạng xã hội hoàn tất! Đang tải dữ liệu mới...');
             clearInterval(intervalId);
             setIsScanning(false);
             setActiveCommandId(null);
@@ -253,10 +253,10 @@ export default function SocialScanClient({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border pb-6">
         <div>
           <h1 className="font-display font-[800] text-3xl text-text tracking-tight">
-            Mạng Xã Hội <span className="text-brand">Scan</span>
+            Dự Án <span className="text-brand">Scan</span>
           </h1>
           <p className="text-sm text-text-3 mt-1">
-            Giám sát xung lực, xu hướng hoạt động cộng đồng và phát hiện Red Flags mạng xã hội của dự án thông qua AI Agent Bốp.
+            Giám sát xung lực, xu hướng hoạt động cộng đồng và phát hiện Red Flags của dự án thông qua AI Agent Bốp.
           </p>
         </div>
         
@@ -389,7 +389,7 @@ export default function SocialScanClient({
                   <Activity className="h-4 w-4" />
                 )}
                 <span>
-                  {isScanning ? 'Đang chạy quét...' : `Khởi Chạy Quét MXH (${selectedProjectIds.size})`}
+                  {isScanning ? 'Đang chạy scan...' : `Khởi Chạy Scan (${selectedProjectIds.size})`}
                 </span>
               </button>
             </div>
@@ -444,7 +444,7 @@ export default function SocialScanClient({
               </div>
               <h3 className="text-lg font-display font-bold text-text mb-2">Chưa chọn dự án</h3>
               <p className="text-sm text-text-3 max-w-xs mx-auto">
-                Vui lòng chọn một dự án từ danh sách theo dõi ở cột bên trái để theo dõi báo cáo phân tích mạng xã hội.
+                Vui lòng chọn một dự án từ danh sách theo dõi ở cột bên trái để theo dõi báo cáo scan chi tiết.
               </p>
             </div>
           )}
@@ -467,7 +467,7 @@ export default function SocialScanClient({
                       Dự án: {project.name}
                     </h3>
                     <p className="text-sm text-text-3 max-w-sm mx-auto mb-6">
-                      Dự án này chưa được AI Agent Bốp quét mạng xã hội hoặc chưa có báo cáo nào được lưu trữ.
+                      Dự án này chưa được AI Agent Bốp scan mạng xã hội hoặc chưa có báo cáo nào được lưu trữ.
                     </p>
                     <button
                       onClick={() => {
@@ -478,7 +478,7 @@ export default function SocialScanClient({
                       className="inline-flex items-center gap-2 rounded-xl bg-brand-soft border border-brand-border px-5 py-2.5 text-xs font-display font-semibold text-brand hover:bg-brand-soft/40 transition cursor-pointer"
                     >
                       <Activity className="h-4 w-4 animate-pulse" />
-                      <span>Quét mạng xã hội ngay bây giờ</span>
+                      <span>Scan mạng xã hội ngay bây giờ</span>
                     </button>
                   </div>
                 )}
@@ -527,7 +527,7 @@ export default function SocialScanClient({
                     {/* Channels Statistics Grid */}
                     <div className="space-y-4">
                       <h3 className="font-display font-bold text-sm text-text-3 uppercase tracking-wider font-mono">
-                        Chỉ số hoạt động các kênh MXH (7 Ngày qua)
+                        Chỉ số hoạt động các kênh (7 Ngày qua)
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {activeReport.payload.channels.map((chan, idx) => (

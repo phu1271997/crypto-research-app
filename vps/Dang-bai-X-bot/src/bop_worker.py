@@ -93,9 +93,14 @@ async def handle_research(command: BotCommand):
     raw_input = payload.get("rawInput", "")
     project_name = payload.get("name", "Dự án")
     
+    # Custom instructions if the project name is the default "Dự án"
+    name_instruction = f"Tên dự án: {project_name}"
+    if project_name == "Dự án":
+        name_instruction += ' (Hãy tự xác định tên chính xác của dự án dựa trên nội dung website và điền vào trường "projectName" trong kết quả JSON, tránh dùng từ "Dự án" chung chung)'
+    
     prompt = f"""
 Bốp ơi, hãy tiến hành Due Diligence chuyên sâu cho dự án này.
-Tên dự án: {project_name}
+{name_instruction}
 Website URL: {url}
 Nội dung website cào được:
 ---
@@ -110,7 +115,7 @@ Hãy đánh giá khắt khe, skeptical by default.
 Cuối cùng in kết quả dưới dạng JSON hợp lệ nằm giữa hai mốc {START_TAG} và {END_TAG} theo cấu trúc:
 {START_TAG}
 {{
-  "projectName": "{project_name}",
+  "projectName": "Tên thương hiệu thực tế của dự án (ví dụ: Monad, Byzanlink... tự xác định từ nội dung website)",
   "website": "{url}",
   "summary": "Tóm tắt dự án",
   "scores": {{

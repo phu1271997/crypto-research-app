@@ -280,6 +280,15 @@ function saveLocalProjects(projects: Project[]) {
 }
 
 // DATABASE PUBLIC API
+function normalizeWebsiteUrl(url: string): string {
+  if (!url) return '';
+  return url.toLowerCase()
+    .replace(/^(https?:\/\/)?(www\.)?/, '')
+    .replace(/\/+$/, '')
+    .trim();
+}
+
+// DATABASE PUBLIC API
 export async function saveProject(project: Omit<Project, 'id' | 'created_at'>): Promise<Project> {
   const newProject: Project = {
     ...project,
@@ -289,14 +298,74 @@ export async function saveProject(project: Omit<Project, 'id' | 'created_at'>): 
 
   await ensureTable();
 
+  const normalizedWeb = normalizeWebsiteUrl(project.website);
+
   if (useLocalDb) {
     const projects = getLocalProjects();
-    projects.push(newProject);
-    saveLocalProjects(projects);
-    return newProject;
+    const existingIndex = projects.findIndex(p => normalizeWebsiteUrl(p.website) === normalizedWeb);
+    
+    if (existingIndex >= 0) {
+      const existing = projects[existingIndex];
+      const updatedProject: Project = {
+        ...existing,
+        ...project,
+      };
+      projects[existingIndex] = updatedProject;
+      saveLocalProjects(projects);
+      return updatedProject;
+    } else {
+      projects.push(newProject);
+      saveLocalProjects(projects);
+      return newProject;
+    }
   }
 
   if (!pool) throw new Error('Database pool not initialized');
+
+  // Query existing projects to find if we have a matching normalized website
+  const checkRes = await pool.query('SELECT id, website FROM projects;');
+  const existingProject = checkRes.rows.find(row => normalizeWebsiteUrl(row.website) === normalizedWeb);
+
+  if (existingProject) {
+    const query = `
+      UPDATE projects SET 
+        name = $1, 
+        website = $2, 
+        total_score = $3, 
+        recommendation = $4, 
+        scores = $5, 
+        summary = $6, 
+        detailed_assessment = $7, 
+        strengths = $8, 
+        risks = $9, 
+        red_flags = $10, 
+        questions_for_founder = $11, 
+        raw_input = $12
+      WHERE id = $13
+      RETURNING created_at;
+    `;
+    const values = [
+      project.name,
+      project.website,
+      project.total_score,
+      project.recommendation,
+      JSON.stringify(project.scores),
+      project.summary,
+      project.detailed_assessment,
+      JSON.stringify(project.strengths),
+      JSON.stringify(project.risks),
+      JSON.stringify(project.red_flags),
+      JSON.stringify(project.questions_for_founder),
+      project.raw_input || null,
+      existingProject.id
+    ];
+    const result = await pool.query(query, values);
+    return {
+      ...project,
+      id: existingProject.id,
+      created_at: result.rows[0].created_at
+    };
+  }
 
   const query = `
     INSERT INTO projects (

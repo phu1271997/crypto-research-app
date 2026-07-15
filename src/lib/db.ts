@@ -108,15 +108,7 @@ const databaseUrl = process.env.DATABASE_URL;
 
 let pool: Pool | null = null;
 let useLocalDb = false;
-
-// Resolve DB directory dynamically (falls back to /tmp if running in read-only Vercel environment)
-function getDbDir() {
-  const isVercel = process.env.VERCEL === '1' || process.env.NOW_BUILDER === '1' || (typeof process.cwd === 'function' && process.cwd().startsWith('/var/task'));
-  return isVercel ? '/tmp/.local_db' : path.join(process.cwd(), '.local_db');
-}
-
-const dbDir = getDbDir();
-const localDbPath = path.join(dbDir, 'projects.json');
+const localDbPath = path.join(process.cwd(), '.local_db', 'projects.json');
 
 // Ensure local db directory exists if fallback is used
 function ensureLocalDb() {
@@ -534,11 +526,12 @@ export async function deleteProject(id: string): Promise<boolean> {
 // ==========================================
 // BOT CONTROL & INTEGRATION DATABASE HELPERS
 // ==========================================
-const localCommandsPath = path.join(dbDir, 'bot_commands.json');
-const localStatusPath = path.join(dbDir, 'bot_status.json');
-const localDraftsPath = path.join(dbDir, 'draft_articles.json');
-const localRecentPath = path.join(dbDir, 'recent_articles.json');
-const localReportsPath = path.join(dbDir, 'scan_reports.json');
+
+const localCommandsPath = path.join(process.cwd(), '.local_db', 'bot_commands.json');
+const localStatusPath = path.join(process.cwd(), '.local_db', 'bot_status.json');
+const localDraftsPath = path.join(process.cwd(), '.local_db', 'draft_articles.json');
+const localRecentPath = path.join(process.cwd(), '.local_db', 'recent_articles.json');
+const localReportsPath = path.join(process.cwd(), '.local_db', 'scan_reports.json');
 
 
 function ensureFileExists(filePath: string, defaultContent: any) {

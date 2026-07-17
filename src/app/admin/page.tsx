@@ -181,7 +181,7 @@ export default function AdminPage() {
 
   // ── Computed ──
   const isOnline = status
-    ? (new Date().getTime() - new Date(status.last_seen).getTime()) < 30000
+    ? (status.is_online ?? ((new Date().getTime() - new Date(status.last_seen).getTime()) < 30000))
     : false;
   const isAnyLoading = loadingAction !== null;
 

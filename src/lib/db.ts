@@ -45,6 +45,7 @@ export interface BotStatus {
   uptime: number;
   config: any;
   status: 'idle' | 'working';
+  is_online?: boolean;
 }
 
 export interface DraftArticle {
@@ -648,7 +649,8 @@ export async function getBotStatus(): Promise<BotStatus | null> {
       last_seen: new Date(),
       uptime: 3600,
       config: { mock_mode: true },
-      status: 'idle'
+      status: 'idle',
+      is_online: true
     }]);
     return statuses[0] || null;
   }
@@ -662,9 +664,13 @@ export async function getBotStatus(): Promise<BotStatus | null> {
 
   if (result.rows.length === 0) return null;
   const row = result.rows[0];
+  const lastSeenDate = new Date(row.last_seen);
+  const isOnline = (new Date().getTime() - lastSeenDate.getTime()) < 30000;
   return {
     ...row,
-    config: typeof row.config === 'string' ? JSON.parse(row.config) : row.config
+    last_seen: lastSeenDate,
+    config: typeof row.config === 'string' ? JSON.parse(row.config) : row.config,
+    is_online: isOnline
   };
 }
 

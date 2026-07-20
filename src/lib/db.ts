@@ -109,7 +109,13 @@ const databaseUrl = process.env.DATABASE_URL;
 
 let pool: Pool | null = null;
 let useLocalDb = false;
-const localDbPath = path.join(process.cwd(), '.local_db', 'projects.json');
+function getDbDir() {
+  const isVercel = process.env.VERCEL === '1' || process.env.NOW_BUILDER === '1' || (typeof process.cwd === 'function' && process.cwd().startsWith('/var/task'));
+  return isVercel ? '/tmp/.local_db' : path.join(process.cwd(), '.local_db');
+}
+
+const dbDir = getDbDir();
+const localDbPath = path.join(dbDir, 'projects.json');
 
 // Ensure local db directory exists if fallback is used
 function ensureLocalDb() {
@@ -136,14 +142,20 @@ if (databaseUrl) {
       connectionTimeoutMillis: 5000,
     });
   } catch (error) {
-    console.error('Failed to initialize PostgreSQL pool, falling back to local file database:', error);
+    if (isProduction) {
+      console.error('CRITICAL: Failed to initialize PostgreSQL pool in production:', error);
+    } else {
+      console.error('Failed to initialize PostgreSQL pool, falling back to local file database:', error);
+      useLocalDb = true;
+      ensureLocalDb();
+    }
+  }
+} else {
+  console.warn('DATABASE_URL is not set.');
+  if (!isProduction) {
     useLocalDb = true;
     ensureLocalDb();
   }
-} else {
-  console.warn('DATABASE_URL is not set. Falling back to local file database (.local_db/projects.json).');
-  useLocalDb = true;
-  ensureLocalDb();
 }
 
 // Automatically create table if PostgreSQL is active
@@ -154,98 +166,129 @@ async function ensureTable() {
   try {
     const client = await pool.connect();
     try {
-      // 1. Create projects table
-      await client.query(`
-        CREATE TABLE IF NOT EXISTS projects (
-          id UUID PRIMARY KEY,
-          name TEXT NOT NULL,
-          website TEXT NOT NULL,
-          total_score INTEGER NOT NULL,
-          recommendation TEXT NOT NULL,
-          scores JSONB NOT NULL,
-          summary TEXT NOT NULL,
-          detailed_assessment TEXT NOT NULL,
-          strengths JSONB NOT NULL,
-          risks JSONB NOT NULL,
-          red_flags JSONB DEFAULT '[]'::jsonb,
-          questions_for_founder JSONB DEFAULT '[]'::jsonb,
-          raw_input TEXT,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-      `);
-      // Add new columns if upgrading from old schema
-      await client.query('ALTER TABLE projects ADD COLUMN IF NOT EXISTS red_flags JSONB DEFAULT \'[]\'::jsonb;');
-      await client.query('ALTER TABLE projects ADD COLUMN IF NOT EXISTS questions_for_founder JSONB DEFAULT \'[]\'::jsonb;');
+      // First, check which required tables already exist
+      const requiredTables = ['projects', 'bot_commands', 'bot_status', 'draft_articles', 'scan_reports', 'recent_articles'];
+      const existingRes = await client.query(`
+        SELECT table_name FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = ANY($1);
+      `, [requiredTables]);
+      const existingTables = new Set(existingRes.rows.map(r => r.table_name));
+      const missingTables = requiredTables.filter(t => !existingTables.has(t));
+
+      if (missingTables.length === 0) {
+        // All tables exist — try to add new columns if upgrading from old schema (safe ALTER)
+        try {
+          await client.query('ALTER TABLE projects ADD COLUMN IF NOT EXISTS red_flags JSONB DEFAULT \'[]\'::jsonb;');
+          await client.query('ALTER TABLE projects ADD COLUMN IF NOT EXISTS questions_for_founder JSONB DEFAULT \'[]\'::jsonb;');
+        } catch {
+          // Ignore ALTER errors — columns may already exist or user may lack ALTER permission
+        }
+        tableChecked = true;
+        console.log('PostgreSQL database schema verified — all tables exist.');
+        return;
+      }
+
+      // Some tables are missing — attempt to create them
+      console.log(`Missing tables: ${missingTables.join(', ')}. Attempting to create...`);
+
+      if (missingTables.includes('projects')) {
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS projects (
+            id UUID PRIMARY KEY,
+            name TEXT NOT NULL,
+            website TEXT NOT NULL,
+            total_score INTEGER NOT NULL,
+            recommendation TEXT NOT NULL,
+            scores JSONB NOT NULL,
+            summary TEXT NOT NULL,
+            detailed_assessment TEXT NOT NULL,
+            strengths JSONB NOT NULL,
+            risks JSONB NOT NULL,
+            red_flags JSONB DEFAULT '[]'::jsonb,
+            questions_for_founder JSONB DEFAULT '[]'::jsonb,
+            raw_input TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
+      } else {
+        // Add new columns if upgrading from old schema
+        await client.query('ALTER TABLE projects ADD COLUMN IF NOT EXISTS red_flags JSONB DEFAULT \'[]\'::jsonb;');
+        await client.query('ALTER TABLE projects ADD COLUMN IF NOT EXISTS questions_for_founder JSONB DEFAULT \'[]\'::jsonb;');
+      }
       
-      // 2. Create bot_commands table
-      await client.query(`
-        CREATE TABLE IF NOT EXISTS bot_commands (
-          id SERIAL PRIMARY KEY,
-          type VARCHAR(50) NOT NULL,
-          payload JSONB DEFAULT '{}'::jsonb,
-          status VARCHAR(20) NOT NULL DEFAULT 'pending',
-          error TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-        );
-      `);
-      await client.query('CREATE INDEX IF NOT EXISTS idx_bot_commands_status ON bot_commands(status);');
+      if (missingTables.includes('bot_commands')) {
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS bot_commands (
+            id SERIAL PRIMARY KEY,
+            type VARCHAR(50) NOT NULL,
+            payload JSONB DEFAULT '{}'::jsonb,
+            status VARCHAR(20) NOT NULL DEFAULT 'pending',
+            error TEXT,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
+        await client.query('CREATE INDEX IF NOT EXISTS idx_bot_commands_status ON bot_commands(status);');
+      }
 
-      // 3. Create bot_status table
-      await client.query(`
-        CREATE TABLE IF NOT EXISTS bot_status (
-          id INT PRIMARY KEY DEFAULT 1,
-          last_seen TIMESTAMP WITH TIME ZONE NOT NULL,
-          uptime INT NOT NULL,
-          config JSONB NOT NULL DEFAULT '{}'::jsonb,
-          status VARCHAR(20) NOT NULL DEFAULT 'idle',
-          CONSTRAINT check_single_row CHECK (id = 1)
-        );
-      `);
+      if (missingTables.includes('bot_status')) {
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS bot_status (
+            id INT PRIMARY KEY DEFAULT 1,
+            last_seen TIMESTAMP WITH TIME ZONE NOT NULL,
+            uptime INT NOT NULL,
+            config JSONB NOT NULL DEFAULT '{}'::jsonb,
+            status VARCHAR(20) NOT NULL DEFAULT 'idle',
+            CONSTRAINT check_single_row CHECK (id = 1)
+          );
+        `);
+      }
 
-      // 4. Create draft_articles table
-      await client.query(`
-        CREATE TABLE IF NOT EXISTS draft_articles (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          topic VARCHAR(500) NOT NULL,
-          status VARCHAR(30) NOT NULL DEFAULT 'draft',
-          version INT NOT NULL DEFAULT 1,
-          payload JSONB NOT NULL,
-          error TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-        );
-      `);
-      await client.query('CREATE INDEX IF NOT EXISTS idx_draft_articles_status ON draft_articles(status);');
+      if (missingTables.includes('draft_articles')) {
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS draft_articles (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            topic VARCHAR(500) NOT NULL,
+            status VARCHAR(30) NOT NULL DEFAULT 'draft',
+            version INT NOT NULL DEFAULT 1,
+            payload JSONB NOT NULL,
+            error TEXT,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
+        await client.query('CREATE INDEX IF NOT EXISTS idx_draft_articles_status ON draft_articles(status);');
+      }
 
-      // 5. Create scan_reports table
-      await client.query(`
-        CREATE TABLE IF NOT EXISTS scan_reports (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          project_id UUID NOT NULL,
-          scanned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-          payload JSONB NOT NULL,
-          status VARCHAR(20) NOT NULL DEFAULT 'done',
-          error TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-        );
-      `);
-      await client.query('CREATE INDEX IF NOT EXISTS idx_scan_reports_project_id ON scan_reports(project_id);');
+      if (missingTables.includes('scan_reports')) {
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS scan_reports (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            project_id UUID NOT NULL,
+            scanned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            payload JSONB NOT NULL,
+            status VARCHAR(20) NOT NULL DEFAULT 'done',
+            error TEXT,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
+        await client.query('CREATE INDEX IF NOT EXISTS idx_scan_reports_project_id ON scan_reports(project_id);');
+      }
 
-
-      // 5. Create recent_articles table
-      await client.query(`
-        CREATE TABLE IF NOT EXISTS recent_articles (
-          id SERIAL PRIMARY KEY,
-          title VARCHAR(500) NOT NULL,
-          slug VARCHAR(255),
-          primus_url VARCHAR(1000),
-          azdag_url VARCHAR(1000),
-          x1_url VARCHAR(1000),
-          x2_url VARCHAR(1000),
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-        );
-      `);
+      if (missingTables.includes('recent_articles')) {
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS recent_articles (
+            id SERIAL PRIMARY KEY,
+            title VARCHAR(500) NOT NULL,
+            slug VARCHAR(255),
+            primus_url VARCHAR(1000),
+            azdag_url VARCHAR(1000),
+            x1_url VARCHAR(1000),
+            x2_url VARCHAR(1000),
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
+      }
 
       tableChecked = true;
       console.log('PostgreSQL database schema verified/created successfully.');
@@ -253,14 +296,28 @@ async function ensureTable() {
       client.release();
     }
   } catch (error) {
-    console.error('Error creating database tables, falling back to local db:', error);
-    useLocalDb = true;
-    ensureLocalDb();
+    // If tables already exist but we lack DDL permissions, still use PostgreSQL for data operations
+    if (error && typeof error === 'object' && 'code' in error && error.code === '42501') {
+      console.warn('Insufficient permissions for DDL operations, but tables may already exist. Continuing with PostgreSQL.');
+      tableChecked = true;
+      return;
+    }
+    if (isProduction) {
+      // In production, don't fall back to local DB — Vercel filesystem is read-only
+      // Mark tableChecked to avoid retrying, let individual queries throw their own errors
+      console.error('Error verifying database tables in production (will retry on next request):', error);
+    } else {
+      console.error('Error verifying database tables, falling back to local db:', error);
+      useLocalDb = true;
+      ensureLocalDb();
+    }
   }
 }
 
+
 // Local JSON File DB helper operations
 function getLocalProjects(): Project[] {
+  if (isProduction) return [];
   ensureLocalDb();
   try {
     const data = fs.readFileSync(localDbPath, 'utf8');
@@ -272,6 +329,7 @@ function getLocalProjects(): Project[] {
 }
 
 function saveLocalProjects(projects: Project[]) {
+  if (isProduction) return;
   ensureLocalDb();
   try {
     fs.writeFileSync(localDbPath, JSON.stringify(projects, null, 2));
@@ -528,11 +586,11 @@ export async function deleteProject(id: string): Promise<boolean> {
 // BOT CONTROL & INTEGRATION DATABASE HELPERS
 // ==========================================
 
-const localCommandsPath = path.join(process.cwd(), '.local_db', 'bot_commands.json');
-const localStatusPath = path.join(process.cwd(), '.local_db', 'bot_status.json');
-const localDraftsPath = path.join(process.cwd(), '.local_db', 'draft_articles.json');
-const localRecentPath = path.join(process.cwd(), '.local_db', 'recent_articles.json');
-const localReportsPath = path.join(process.cwd(), '.local_db', 'scan_reports.json');
+const localCommandsPath = path.join(dbDir, 'bot_commands.json');
+const localStatusPath = path.join(dbDir, 'bot_status.json');
+const localDraftsPath = path.join(dbDir, 'draft_articles.json');
+const localRecentPath = path.join(dbDir, 'recent_articles.json');
+const localReportsPath = path.join(dbDir, 'scan_reports.json');
 
 
 function ensureFileExists(filePath: string, defaultContent: any) {

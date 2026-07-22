@@ -723,7 +723,8 @@ export async function getBotStatus(): Promise<BotStatus | null> {
   if (result.rows.length === 0) return null;
   const row = result.rows[0];
   const lastSeenDate = new Date(row.last_seen);
-  const isOnline = (new Date().getTime() - lastSeenDate.getTime()) < 30000;
+  // Bot heartbeat runs every 10s; allow 90s buffer to survive PM2 restarts and DNS blips
+  const isOnline = (new Date().getTime() - lastSeenDate.getTime()) < 90000;
   return {
     ...row,
     last_seen: lastSeenDate,
